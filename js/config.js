@@ -18,12 +18,15 @@ var CONFIG = {
   BAND_RATIO:                 0.15,  /* outer ring width / outer radius — gold band in orb AND teal band in figures */
   CENTRE_RATIO:               0.33,  /* inner circle radius / outer radius: teal-in-orb AND gold-in-Christ */
 
-  /* Figure proportions */
-  HEAD_BODY_RATIO:            0.45,  /* head circle radius / body circle radius (drawHuman) */
-  HEAD_Y_OFFSET:              0.22,  /* head centre Y above figure centre, as fraction of size (drawHuman) */
-  HEART_CHEST_RATIO:          0.56,  /* heart-orb radius / body circle radius (drawChurchFig) */
-  SIN_ORB_RATIO:              0.52,  /* sin-orb radius / body circle radius (orbState4a/4b) */
+  /* Figure proportions
+     Head radius = bR × CENTRE_RATIO  (head IS the centre of the figure, as teal/gold dot is the centre of the orb/body)
+     Head gap    = bR × BAND_RATIO    (one band-width of clear space between head bottom and body top — derived, no extra param)
+     Heart is intentionally 1.7× the gold dot (HEART_CHEST_RATIO vs CENTRE_RATIO) — intimacy > cosmic principle
+     Sin-orb is intentionally 1.6× (weight and opacity of sin vs. light) */
+  HEART_CHEST_RATIO:          0.56,  /* heart radius / body radius — deliberately larger than CENTRE_RATIO */
+  SIN_ORB_RATIO:              0.52,  /* sin-orb radius / body radius — deliberately larger than CENTRE_RATIO */
   LARGE_ORB_SCALE:       0.22,   /* orb radius = min(w,h) * this */
+  RAY_TIP_WIDTH:         0.04,   /* ray half-width at tip as fraction of min(w,h) — 0 = hairline, grows outward */
 
   /* Layout ratios (fraction of Math.min(w,h) unless noted) */
   FIGURE_STAGGER:        0.12,   /* stagger between figure animations */

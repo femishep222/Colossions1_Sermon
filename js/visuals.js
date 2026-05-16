@@ -104,10 +104,13 @@
      fillCol = inner fill colour  headFill defaults to ringCol (solid) if omitted */
   function drawHuman(ctx, cx, cy, size, ringCol, fillCol, headFill) {
     var bR     = size * 0.25;
-    var hR     = bR * CONFIG.HEAD_BODY_RATIO;
-    var headCy = cy - size * CONFIG.HEAD_Y_OFFSET;
-    var bodyCy = cy + size * 0.14;
     var bandW  = bR * CONFIG.BAND_RATIO;
+    /* Head = CENTRE_RATIO of body radius — the head IS the centre of the figure,
+       mirroring how the teal/gold dot is the centre of the orb/body circle.
+       Gap between head bottom and body top = one band-width (principled unit). */
+    var hR     = bR * CONFIG.CENTRE_RATIO;
+    var bodyCy = cy + size * 0.14;
+    var headCy = bodyCy - bR - bandW - hR;  /* body top − gap − head radius */
     var hFill  = (headFill !== undefined) ? headFill : ringCol;
 
     ctx.save();
@@ -339,16 +342,24 @@
 
       ctx.clearRect(0, 0, w, h);
 
+      var tipHW = Math.min(w, h) * CONFIG.RAY_TIP_WIDTH;
       rays.forEach(function (ray) {
-        var len = maxLen * p;
+        var len  = maxLen * p;
+        var tipX = cx + ray.dx * len;
+        var tipY = cy + ray.dy * len;
+        /* Perpendicular to ray direction — for cardinal dirs (dx,dy) this is simply (-dy, dx) */
+        var px = -ray.dy, py = ray.dx;
+        var hw = tipHW * p;  /* half-width at tip, grows with animation progress */
         ctx.save();
-        ctx.globalAlpha = 0.5 * p;
-        ctx.shadowBlur  = 5; ctx.shadowColor = TEAL;
-        ctx.strokeStyle = TEAL; ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.45 * p;
+        ctx.shadowBlur  = hw * 2; ctx.shadowColor = TEAL;
+        ctx.fillStyle   = TEAL;
         ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(cx + ray.dx * len, cy + ray.dy * len);
-        ctx.stroke();
+        ctx.moveTo(cx, cy);                        /* apex — orb covers this point */
+        ctx.lineTo(tipX - px * hw, tipY - py * hw);
+        ctx.lineTo(tipX + px * hw, tipY + py * hw);
+        ctx.closePath();
+        ctx.fill();
         ctx.restore();
 
         if (p > 0.72) {
