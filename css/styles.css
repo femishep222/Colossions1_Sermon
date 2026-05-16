@@ -1,1 +1,211 @@
-/* styles.css — In Relationship sermon presentation */
+/* ─────────────────────────────────────────────
+   RESET
+───────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─────────────────────────────────────────────
+   BASE — full-screen, no scroll
+───────────────────────────────────────────── */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: #ece4c9;
+  color: #FFFFFF;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─────────────────────────────────────────────
+   TITLE BAR
+───────────────────────────────────────────── */
+#title-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 2rem 0.8rem;
+  border-bottom: 1px solid #1C1C1C;
+  position: relative;
+  z-index: 20;
+}
+
+#sermon-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 400;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  color: #FFFFFF;
+}
+
+#series-ref {
+  font-size: 0.68rem;
+  font-weight: 300;
+  color: #555555;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────────────
+   MAIN STAGE — two columns
+───────────────────────────────────────────── */
+#story-stage {
+  flex: 1 1 auto;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Left panel — 1/3 */
+#story-left {
+  flex: 0 0 33.33%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.5rem 2.5rem 2.5rem 3rem;
+  border-right: 1px solid #1C1C1C;
+  gap: 1.75rem;
+  position: relative;
+  z-index: 20;
+}
+
+#section-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #666666;
+  min-height: 0.9rem;
+}
+
+#scripture-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+/* Each scripture entry (ref + text) */
+.scripture-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.scripture-ref {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #B8880A;
+}
+
+.scripture-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #D8D8D8;
+}
+
+/* Second scripture — slightly dimmed */
+.scripture-item + .scripture-item .scripture-ref {
+  color: #666666;
+}
+
+.scripture-item + .scripture-item .scripture-text {
+  color: #888888;
+  font-size: 1rem;
+}
+
+/* ─────────────────────────────────────────────
+   RIGHT PANEL — canvas
+───────────────────────────────────────────── */
+#story-right {
+  flex: 1 1 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+#visual-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* pixel dimensions set by app.js */
+}
+
+/* ─────────────────────────────────────────────
+   BOTTOM BAR
+───────────────────────────────────────────── */
+#bottom-bar {
+  flex: 0 0 auto;
+  border-top: 1px solid #1C1C1C;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.55rem 2rem 0.5rem;
+  position: relative;
+  z-index: 20;
+}
+
+#beat-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+#beat-nav button {
+  background: none;
+  border: none;
+  color: #666666;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  font-family: inherit;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+#beat-nav button:hover:not(:disabled) {
+  color: #CCCCCC;
+}
+
+#beat-nav button:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+#beat-counter {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: #444444;
+  min-width: 7rem;
+  text-align: center;
+}
+
+#attribution {
+  font-size: 0.58rem;
+  color: #333333;
+  letter-spacing: 0.04em;
+}
+
+/* ─────────────────────────────────────────────
+   FULL-PAGE CLICK OVERLAY
+   Sits above canvas (z 10) but below nav (z 20)
+───────────────────────────────────────────── */
+#story-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  cursor: pointer;
+}
