@@ -72,19 +72,24 @@ body {
   justify-content: center;
   padding: 2.5rem 2.5rem 2.5rem 3rem;
   border-right: 1px solid #1C1C1C;
-  gap: 1.75rem;
   position: relative;
   z-index: 20;
 }
 
 #section-title {
+  position: absolute;
+  top: 1.4rem;
+  left: 0;
+  right: 0;
   font-family: 'Inter', sans-serif;
   font-weight: 500;
   font-size: 0.65rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #666666;
-  min-height: 0.9rem;
+  color: rgba(60, 45, 20, 0.60);
+  text-align: center;
+  z-index: 15;
+  pointer-events: none;
 }
 
 #scripture-block {
@@ -100,13 +105,31 @@ body {
   gap: 0.45rem;
 }
 
+@keyframes goldShimmer {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.72; text-shadow: 0 0 8px rgba(245, 197, 24, 0.55); }
+}
+
+@keyframes iridescent {
+  0%   { filter: hue-rotate(0deg)   brightness(1.00); }
+  25%  { filter: hue-rotate(30deg)  brightness(1.10); }
+  50%  { filter: hue-rotate(-20deg) brightness(1.05); }
+  75%  { filter: hue-rotate(15deg)  brightness(1.08); }
+  100% { filter: hue-rotate(0deg)   brightness(1.00); }
+}
+
+.spirit-shimmer {
+  animation: iridescent 6s ease-in-out infinite;
+}
+
 .scripture-ref {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
   font-size: 0.65rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #B8880A;
+  color: #8B6914;
+  animation: goldShimmer 3s ease-in-out infinite;
 }
 
 .scripture-text {
@@ -114,16 +137,16 @@ body {
   font-style: italic;
   font-size: 1.2rem;
   line-height: 1.6;
-  color: #D8D8D8;
+  color: #3C2F1E;
 }
 
 /* Second scripture — slightly dimmed */
 .scripture-item + .scripture-item .scripture-ref {
-  color: #666666;
+  color: #7A5C10;
 }
 
 .scripture-item + .scripture-item .scripture-text {
-  color: #888888;
+  color: #5C4A32;
   font-size: 1rem;
 }
 

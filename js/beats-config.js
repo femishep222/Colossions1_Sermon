@@ -4,7 +4,7 @@ var BEATS = [
 
   {
     id: 'beat-intro',
-    sectionTitle: 'The Image and the Real Thing',
+    sectionTitle: 'The Image vs Real Thing',
     scripture: null,
     visual: null,
     subBeats: []
@@ -12,26 +12,26 @@ var BEATS = [
 
   {
     id: 'beat-1',
-    sectionTitle: 'The Paradox: Christ as Image',
+    sectionTitle: 'The Paradox: Just an Image or God himself?',
     scripture: { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
-    visual: 'orbIntro',
+    visual: null,
     subBeats: []
   },
 
   {
     id: 'beat-2',
-    sectionTitle: 'Before Time: The Eternal Relationship',
+    sectionTitle: 'The Son: Relationship Eternal',
     scripture: [
       { ref: 'Col 1:17',  text: 'He is before all things.' },
       { ref: 'John 17:5', text: 'Glorify me in your own presence with the glory I had with you before the world existed.' }
     ],
-    visual: 'orbState1',
+    visual: 'orbIntro',
     subBeats: []
   },
 
   {
     id: 'beat-3',
-    sectionTitle: 'The Word: Creation as Relationship Extended',
+    sectionTitle: 'The Word: Relationship in Creation',
     scripture: [
       { ref: 'Col 1:16–17', text: 'All things were created through him and for him. In him all things hold together.' },
       { ref: 'John 1:1–3',  text: 'In the beginning was the Word, and the Word was with God, and the Word was God. All things were made through him.' }
