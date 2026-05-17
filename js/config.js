@@ -27,6 +27,9 @@ var CONFIG = {
   SIN_ORB_RATIO:              0.52,  /* sin-orb radius / body radius — deliberately larger than CENTRE_RATIO */
   LARGE_ORB_SCALE:       0.22,   /* orb radius = min(w,h) * this */
   ORB_CENTRE_Y:          0.59,   /* vertical centre for beats 3–5 orb/figure, as fraction of h (push down to clear title) */
+  IMAGE_TOP_PAD:         0.10,   /* fraction of h to reserve at top for section-title overlay on image beats */
+  CROSS_LINE_ALPHA:      0.65,   /* opacity of the bold cross background in beats 6–7 */
+  CROSS_LINE_SCALE:      0.007,  /* cross line width as fraction of min(w,h) */
   RAY_TIP_WIDTH:         0.07,   /* ray half-width at tip as fraction of min(w,h) — 0 = hairline, grows outward */
 
   /* Layout ratios (fraction of Math.min(w,h) unless noted) */

@@ -5,18 +5,26 @@ var BEATS = [
 
   {
     id: 'beat-1',
-    sectionTitle: 'The Norm:  Image  vs  Reality',
+    sectionTitle: 'The Norm:  Image  ≠  Reality',
     scripture: null,
-    visual: null,
+    visual: 'imageStatue',
     subBeats: []
   },
 
   {
     id: 'beat-2',
-    sectionTitle: 'The Christ: Just an Image or God himself?',
+    sectionTitle: 'Christ: Just an Image or God himself?',
     scripture: { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
-    visual: null,
-    subBeats: []
+    visual: 'imageLakeReflection',
+    subBeats: [
+      {
+        id: 'beat-2a',
+        sectionTitle: 'eikōn = reality',
+        scripture: { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
+        visual: 'imageLakeReflection',
+        subBeats: []
+      }
+    ]
   },
 
   {
@@ -32,7 +40,7 @@ var BEATS = [
 
   {
     id: 'beat-4',
-    sectionTitle: 'The Word: Holds all things together',
+    sectionTitle: 'The Word: Holds all creation together',
     scripture: [
       { ref: 'Col 1:16–17', text: 'All things were created through him and for him. And he is before all things, and in him all things hold together.' },
       { ref: 'John 1:1–3',  text: 'In the beginning was the Word, and the Word was with God, and the Word was God. All things were made through him.' }
@@ -82,7 +90,7 @@ var BEATS = [
 
   {
     id: 'beat-9',
-    sectionTitle: 'The Head of the Church: A Holy, Blameless Body',
+    sectionTitle: 'The Head: A Holy, Blameless Church',
     scripture: [
       { ref: 'Col 1:16–17', text: 'And he is the head of the body, the church.' },
     ],

@@ -219,12 +219,12 @@
   }
 
   /* Very faint teal compass rays — used as lingering background in States 3+ */
-  function drawFaintRays(ctx, cx, cy, w, h, alpha) {
+  function drawFaintRays(ctx, cx, cy, w, h, alpha, colour, lw) {
     var maxLen = Math.sqrt(w * w + h * h);
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.strokeStyle = TEAL;
-    ctx.lineWidth   = 1;
+    ctx.strokeStyle = colour || TEAL;
+    ctx.lineWidth   = lw || 1;
     [[0, -1], [1, 0], [0, 1], [-1, 0]].forEach(function (d) {
       ctx.beginPath();
       ctx.moveTo(cx, cy);
@@ -260,7 +260,42 @@
 
   window.VISUALS = {};
 
-  /* ── Beat 1: introduce the orb, full-screen, still ── */
+  /* ── Image helper: contain-scale an image in the canvas area below the title overlay ── */
+  function drawImageContain(ctx, img, w, h) {
+    var topPad = h * CONFIG.IMAGE_TOP_PAD;
+    var availH = h - topPad;
+    var scale  = Math.min(w / img.width, availH / img.height);
+    var sw = img.width * scale, sh = img.height * scale;
+    ctx.drawImage(img, (w - sw) / 2, topPad + (availH - sh) / 2, sw, sh);
+  }
+
+  /* ── Beat 1: statue image ── */
+  var _imgStatue = null;
+  window.VISUALS.imageStatue = function (ctx, w, h) {
+    if (_imgStatue && _imgStatue.complete) {
+      drawImageContain(ctx, _imgStatue, w, h);
+    } else {
+      _imgStatue = new Image();
+      _imgStatue.onload = function () { drawImageContain(ctx, _imgStatue, w, h); };
+      _imgStatue.src = 'Assets/imagestatue(beat1).jpg';
+    }
+    return null;
+  };
+
+  /* ── Beat 2: lake reflection image ── */
+  var _imgLake = null;
+  window.VISUALS.imageLakeReflection = function (ctx, w, h) {
+    if (_imgLake && _imgLake.complete) {
+      drawImageContain(ctx, _imgLake, w, h);
+    } else {
+      _imgLake = new Image();
+      _imgLake.onload = function () { drawImageContain(ctx, _imgLake, w, h); };
+      _imgLake.src = 'Assets/lakereflection(beat2).jpg';
+    }
+    return null;
+  };
+
+  /* ── Beat 3: introduce the orb, full-screen, still ── */
   window.VISUALS.orbIntro = function (ctx, w, h) {
     var r = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
     drawOrb(ctx, w / 2, h * CONFIG.ORB_CENTRE_Y, r);
@@ -452,6 +487,7 @@
     var fSz  = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz  = Math.min(w, h) * CONFIG.CHRIST_SIZE;
     var sinR = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
+    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
     var DURATION = 800;
     var running = true, t0 = null;
 
@@ -461,7 +497,7 @@
       var p = easeOut(Math.min((ts - t0) / DURATION, 1));
 
       ctx.clearRect(0, 0, w, h);
-      drawFaintRays(ctx, cp.x, cp.y, w, h, 0.08);
+      drawFaintRays(ctx, cp.x, cp.y, w, h, CONFIG.CROSS_LINE_ALPHA, SIN, crossLW);
 
       /* Lines */
       ctx.save();
@@ -500,6 +536,7 @@
     var cSz   = Math.min(w, h) * CONFIG.CHRIST_SIZE;
     var sinR  = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
     var cOrbR = cSz * 0.25 * CONFIG.CENTRE_RATIO;
+    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
     var TRAVEL  = 1600;
     var SPIRIT  = 900;
     var running = true, t0 = null;
@@ -512,7 +549,7 @@
       var sP = easeOut(Math.min(Math.max((elapsed - TRAVEL) / SPIRIT, 0), 1));
 
       ctx.clearRect(0, 0, w, h);
-      drawFaintRays(ctx, cp.x, cp.y, w, h, 0.08);
+      drawFaintRays(ctx, cp.x, cp.y, w, h, CONFIG.CROSS_LINE_ALPHA, SIN, crossLW);
 
       /* Lines */
       ctx.save();
