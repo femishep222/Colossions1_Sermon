@@ -234,6 +234,48 @@
     ctx.restore();
   }
 
+  /* Trinity band labels: FATHER (outer), SPIRIT (middle), SON (centre) at the north position.
+     inverted=true flips colours for the teal-outer figure (orbState3). */
+  function drawOrbLabels(ctx, cx, cy, r, inverted) {
+    var bandW   = r * CONFIG.BAND_RATIO;
+    var innerR  = r * (1 - CONFIG.BAND_RATIO);
+    var centreR = r * CONFIG.CENTRE_RATIO;
+    var fs      = Math.round(bandW * 0.35);
+
+    ctx.save();
+    ctx.font          = '600 ' + fs + 'px Inter, sans-serif';
+    ctx.textAlign     = 'center';
+    ctx.textBaseline  = 'middle';
+    ctx.letterSpacing = '0.10em';
+
+    ctx.fillStyle = inverted ? PEARL : GOLD_DK;
+    ctx.fillText('FATHER', cx, cy - (r + innerR)  / 2);
+
+    ctx.fillStyle = TEAL;
+    ctx.fillText('SPIRIT', cx, cy - (innerR + centreR) / 2);
+
+    ctx.fillStyle = inverted ? GOLD_DK : PEARL;
+    ctx.fillText('SON',    cx, cy);
+
+    ctx.restore();
+  }
+
+  /* Cross: 4 arms radiating from centre — pass halfW/halfH scaled by progress for animation */
+  function drawCross(ctx, cx, cy, halfW, halfH, alpha, lw) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = SIN;
+    ctx.lineWidth   = lw;
+    ctx.lineCap     = 'round';
+    [[0, -halfH], [0, halfH], [-halfW, 0], [halfW, 0]].forEach(function (d) {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + d[0], cy + d[1]);
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
   /* Layout: 5 figures in a row below centre */
   function figPositions(w, h) {
     var rowY = h * CONFIG.FIGURES_Y, gap = w * CONFIG.FIGURES_GAP, cx = w * 0.5;
@@ -434,6 +476,12 @@
         }
       });
 
+      /* Trinity labels — on top of orb and rays */
+      ctx.save();
+      ctx.globalAlpha = p;
+      drawOrbLabels(ctx, cx, cy, r, false);
+      ctx.restore();
+
       if (p < 1) requestAnimationFrame(frame);
       else running = false;
     }
@@ -473,6 +521,12 @@
       drawChrist(ctx, cx, figCy, figH);
       ctx.restore();
 
+      /* Trinity labels on body circle — inverted colours (teal outer = FATHER) */
+      ctx.save();
+      ctx.globalAlpha = p;
+      drawOrbLabels(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR, true);
+      ctx.restore();
+
       if (p < 1) requestAnimationFrame(frame);
       else running = false;
     }
@@ -484,20 +538,24 @@
   window.VISUALS.orbState4a = function (ctx, w, h) {
     var cp    = christXY(w, h);
     var figs  = figPositions(w, h);
-    var fSz  = Math.min(w, h) * CONFIG.FIGURE_SIZE;
-    var cSz  = Math.min(w, h) * CONFIG.CHRIST_SIZE;
-    var sinR = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
+    var fSz   = Math.min(w, h) * CONFIG.FIGURE_SIZE;
+    var cSz   = Math.min(w, h) * CONFIG.CHRIST_SIZE;
+    var sinR  = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
     var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
+    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
+    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
     var DURATION = 800;
     var running = true, t0 = null;
 
     function frame(ts) {
       if (!running) return;
       if (!t0) t0 = ts;
-      var p = easeOut(Math.min((ts - t0) / DURATION, 1));
+      var elapsed = ts - t0;
+      var p  = easeOut(Math.min(elapsed / DURATION, 1));
+      var xP = easeOut(Math.min(elapsed / CONFIG.CROSS_DURATION, 1));
 
       ctx.clearRect(0, 0, w, h);
-      drawFaintRays(ctx, cp.x, cp.y, w, h, CONFIG.CROSS_LINE_ALPHA, SIN, crossLW);
+      drawCross(ctx, cp.x, cp.y, crossW * xP, crossH * xP, CONFIG.CROSS_LINE_ALPHA, crossLW);
 
       /* Lines */
       ctx.save();
@@ -521,7 +579,7 @@
       drawChrist(ctx, cp.x, cp.y, cSz);
       ctx.restore();
 
-      if (p < 1) requestAnimationFrame(frame);
+      if (p < 1 || xP < 1) requestAnimationFrame(frame);
       else running = false;
     }
     requestAnimationFrame(frame);
@@ -535,8 +593,10 @@
     var fSz   = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz   = Math.min(w, h) * CONFIG.CHRIST_SIZE;
     var sinR  = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
-    var cOrbR = cSz * 0.25 * CONFIG.CENTRE_RATIO;
+    var cOrbR   = cSz * 0.25 * CONFIG.CENTRE_RATIO;
     var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
+    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
+    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
     var TRAVEL  = 1600;
     var SPIRIT  = 900;
     var running = true, t0 = null;
@@ -549,7 +609,7 @@
       var sP = easeOut(Math.min(Math.max((elapsed - TRAVEL) / SPIRIT, 0), 1));
 
       ctx.clearRect(0, 0, w, h);
-      drawFaintRays(ctx, cp.x, cp.y, w, h, CONFIG.CROSS_LINE_ALPHA, SIN, crossLW);
+      drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
 
       /* Lines */
       ctx.save();

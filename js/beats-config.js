@@ -5,7 +5,7 @@ var BEATS = [
 
   {
     id: 'beat-1',
-    sectionTitle: 'The Norm:  Image  ≠  Reality',
+    sectionTitle: 'Our Norm:  Image  ≠  Reality',
     scripture: null,
     visual: 'imageStatue',
     subBeats: []

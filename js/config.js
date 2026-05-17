@@ -29,7 +29,10 @@ var CONFIG = {
   ORB_CENTRE_Y:          0.59,   /* vertical centre for beats 3–5 orb/figure, as fraction of h (push down to clear title) */
   IMAGE_TOP_PAD:         0.10,   /* fraction of h to reserve at top for section-title overlay on image beats */
   CROSS_LINE_ALPHA:      0.65,   /* opacity of the bold cross background in beats 6–7 */
-  CROSS_LINE_SCALE:      0.007,  /* cross line width as fraction of min(w,h) */
+  CROSS_LINE_SCALE:      0.0175, /* cross line width as fraction of min(w,h) — intentionally heavy */
+  CROSS_H_RATIO:         0.50,   /* cross half-height / Christ-figure size (vertical arm) */
+  CROSS_W_RATIO:         0.38,   /* cross half-width  / Christ-figure size (horizontal arm, narrower) */
+  CROSS_DURATION:        1200,   /* ms for cross arms to extend from centre */
   RAY_TIP_WIDTH:         0.07,   /* ray half-width at tip as fraction of min(w,h) — 0 = hairline, grows outward */
 
   /* Layout ratios (fraction of Math.min(w,h) unless noted) */
