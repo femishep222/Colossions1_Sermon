@@ -262,32 +262,31 @@
 
   /* ── Beat 1: introduce the orb, full-screen, still ── */
   window.VISUALS.orbIntro = function (ctx, w, h) {
-    var r = Math.min(w, h) * 0.22;
-    drawOrb(ctx, w / 2, h / 2, r);
+    var r = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
+    drawOrb(ctx, w / 2, h * CONFIG.ORB_CENTRE_Y, r);
     return null;
   };
 
-  /* ── Beat 2: State 1 — still orb, "Before time" ── */
+  /* ── orbState1 — still orb (unused in current beats, kept for reference) ── */
   window.VISUALS.orbState1 = function (ctx, w, h) {
-    var r = Math.min(w, h) * 0.22;
-    drawOrb(ctx, w / 2, h / 2, r);
+    var r = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
+    drawOrb(ctx, w / 2, h * CONFIG.ORB_CENTRE_Y, r);
     return null;
   };
 
-  /* ── Beat 3: State 2 — orb + 4 rays extending outward ── */
+  /* ── Beat 3: State 2 — orb + 5 rays extending outward (pentagonal, mirrors 5 church figures) ── */
   window.VISUALS.orbState2 = function (ctx, w, h) {
-    var cx = w / 2, cy = h / 2;
-    var r  = Math.min(w, h) * 0.22;
+    var cx = w / 2, cy = h * CONFIG.ORB_CENTRE_Y;
+    var r  = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
     var maxLen = Math.sqrt(w * w + h * h) * 0.54;
     var DURATION = 3300;
     var running = true, t0 = null;
 
-    var rays = [
-      { dx:  0, dy: -1, tag: 'star'  },
-      { dx:  1, dy:  0, tag: 'eq'    },
-      { dx:  0, dy:  1, tag: 'wave'  },
-      { dx: -1, dy:  0, tag: 'dna'   }
-    ];
+    var TAGS = ['star', 'eq', 'wave', 'dna', 'cross'];
+    var rays = TAGS.map(function (tag, i) {
+      var a = -Math.PI / 2 + i * (Math.PI * 2 / 5);  /* start pointing up, 72° apart */
+      return { dx: Math.cos(a), dy: Math.sin(a), tag: tag };
+    });
 
     function drawSymbol(ctx, x, y, tag, sz) {
       ctx.save();
@@ -331,6 +330,12 @@
           }
           ctx.stroke();
         });
+
+      } else if (tag === 'cross') {
+        var arm = sz * 1.0, bar = sz * 0.28;
+        ctx.fillStyle = TEAL_LT;
+        ctx.fillRect(x - arm, y - bar, arm * 2, bar * 2);  /* horizontal */
+        ctx.fillRect(x - bar, y - arm, bar * 2, arm * 2);  /* vertical */
       }
       ctx.restore();
     }
@@ -341,6 +346,8 @@
       var p = easeOut(Math.min((ts - t0) / DURATION, 1));
 
       ctx.clearRect(0, 0, w, h);
+
+      drawOrb(ctx, cx, cy, r);
 
       var tipHW = Math.min(w, h) * CONFIG.RAY_TIP_WIDTH;
       rays.forEach(function (ray) {
@@ -362,6 +369,26 @@
         ctx.fill();
         ctx.restore();
 
+        /* "WORD" text tracking outward along the ray midpoint */
+        if (len > r * 1.5) {
+          var midX     = cx + ray.dx * len * 0.40;
+          var midY     = cy + ray.dy * len * 0.40;
+          var angle    = Math.atan2(ray.dy, ray.dx);
+          if (Math.cos(angle) < 0) angle += Math.PI;  /* flip rays pointing leftward so text reads right-way up */
+          var fontSize = Math.min(w, h) * 0.022;
+          ctx.save();
+          ctx.globalAlpha = p * 0.75;
+          ctx.translate(midX, midY);
+          ctx.rotate(angle);
+          ctx.font          = '300 ' + fontSize + 'px Inter, sans-serif';
+          ctx.fillStyle     = PEARL;
+          ctx.textAlign     = 'center';
+          ctx.textBaseline  = 'middle';
+          ctx.letterSpacing = '0.18em';
+          ctx.fillText('WORD', 0, 0);
+          ctx.restore();
+        }
+
         if (p > 0.72) {
           var a = (p - 0.72) / 0.28;
           ctx.save();
@@ -371,8 +398,6 @@
           ctx.restore();
         }
       });
-
-      drawOrb(ctx, cx, cy, r);
 
       if (p < 1) requestAnimationFrame(frame);
       else running = false;
@@ -387,7 +412,7 @@
     var cx    = w / 2;
     var bigR  = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
     var figH  = bigR * 4;
-    var figCy = h / 2 - figH * 0.14;
+    var figCy = h * CONFIG.ORB_CENTRE_Y - figH * 0.14;
     var DURATION = 1800;
     var running = true, t0 = null;
 
@@ -397,12 +422,12 @@
       var p = easeOut(Math.min((ts - t0) / DURATION, 1));
 
       ctx.clearRect(0, 0, w, h);
-      drawFaintRays(ctx, cx, h / 2, w, h, 0.12);
+      drawFaintRays(ctx, cx, h * CONFIG.ORB_CENTRE_Y, w, h, 0.12);
 
-      /* Orb fading out — centred at h/2 = body circle centre */
+      /* Orb fading out — centred at ORB_CENTRE_Y = body circle centre */
       ctx.save();
       ctx.globalAlpha = 1 - p;
-      drawOrb(ctx, cx, h / 2, bigR);
+      drawOrb(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR);
       ctx.restore();
 
       /* Figure fading in */
@@ -751,6 +776,110 @@
        */
 
       if (el < T_RING) requestAnimationFrame(frame);
+      else running = false;
+    }
+    requestAnimationFrame(frame);
+    return function () { running = false; };
+  };
+
+  /* ── Final beat: gold rays from Christ through each church figure — "ALL" ── */
+  window.VISUALS.orbStateAll = function (ctx, w, h) {
+    var cp   = christXY(w, h);
+    var fSz  = Math.min(w, h) * CONFIG.FIGURE_SIZE;
+    var cSz  = Math.min(w, h) * CONFIG.CHRIST_SIZE;
+
+    var aBodyR   = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
+    var aBodyCx  = w / 2;
+    var aBodyCy  = h * 0.62;
+    var christRingR  = cSz * 0.46;
+    var christRingCy = cp.y - cSz * 0.04;
+
+    /* Figure target positions (same pentagon as orbState5Held) */
+    var ANGLES  = [234, 162, 90, 18, 306].map(function (d) { return d * Math.PI / 180; });
+    var targets = ANGLES.map(function (a) {
+      return { x: aBodyCx + aBodyR * Math.cos(a), y: aBodyCy + aBodyR * Math.sin(a) };
+    });
+
+    /* Ray directions: from Christ normalised toward each figure — rays pass through them */
+    var rayDirs = targets.map(function (t) {
+      var dx = t.x - cp.x, dy = t.y - cp.y;
+      var d  = Math.sqrt(dx * dx + dy * dy);
+      return { dx: dx / d, dy: dy / d };
+    });
+
+    var maxLen   = Math.sqrt(w * w + h * h) * 0.54;
+    var tipHW    = Math.min(w, h) * CONFIG.RAY_TIP_WIDTH;
+    var DURATION = 2400;
+    var running  = true, t0 = null;
+
+    function frame(ts) {
+      if (!running) return;
+      if (!t0) t0 = ts;
+      var p = easeOut(Math.min((ts - t0) / DURATION, 1));
+
+      ctx.clearRect(0, 0, w, h);
+      drawFaintRays(ctx, cp.x, cp.y, w, h, 0.07);
+
+      /* Static final state: rings */
+      ctx.save();
+      ctx.globalAlpha = 0.65;
+      drawRing(ctx, aBodyCx, aBodyCy, aBodyR, TEAL);
+      drawRing(ctx, cp.x, christRingCy, christRingR, TEAL);
+      ctx.restore();
+
+      /* Church figures at final ring positions */
+      targets.forEach(function (t, i) {
+        drawChurchFig(ctx, t.x, t.y, fSz, PASTELS[i]);
+      });
+
+      /* Christ */
+      ctx.save();
+      ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
+      drawChrist(ctx, cp.x, cp.y, cSz);
+      ctx.restore();
+
+      /* Gold rays — drawn last, on top, passing through the figures */
+      rayDirs.forEach(function (ray) {
+        var len  = maxLen * p;
+        var tipX = cp.x + ray.dx * len;
+        var tipY = cp.y + ray.dy * len;
+        var px   = -ray.dy, py = ray.dx;
+        var hw   = tipHW * p;
+
+        ctx.save();
+        ctx.globalAlpha = 0.45 * p;
+        ctx.shadowBlur  = hw * 2; ctx.shadowColor = GOLD;
+        ctx.fillStyle   = GOLD;
+        ctx.beginPath();
+        ctx.moveTo(cp.x, cp.y);
+        ctx.lineTo(tipX - px * hw, tipY - py * hw);
+        ctx.lineTo(tipX + px * hw, tipY + py * hw);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        /* "ALL" text at 40% along the ray */
+        if (len > cSz * 1.5) {
+          var midX     = cp.x + ray.dx * len * 0.40;
+          var midY     = cp.y + ray.dy * len * 0.40;
+          var angle    = Math.atan2(ray.dy, ray.dx);
+          if (Math.cos(angle) < 0) angle += Math.PI;
+          var fontSize = Math.min(w, h) * 0.022;
+          ctx.save();
+          ctx.globalAlpha   = p * 0.85;
+          ctx.translate(midX, midY);
+          ctx.rotate(angle);
+          ctx.font          = '300 ' + fontSize + 'px Inter, sans-serif';
+          ctx.fillStyle     = PEARL;
+          ctx.textAlign     = 'center';
+          ctx.textBaseline  = 'middle';
+          ctx.letterSpacing = '0.18em';
+          ctx.fillText('ALL', 0, 0);
+          ctx.restore();
+        }
+      });
+
+      if (p < 1) requestAnimationFrame(frame);
       else running = false;
     }
     requestAnimationFrame(frame);

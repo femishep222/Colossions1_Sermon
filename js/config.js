@@ -2,20 +2,20 @@
 
 var CONFIG = {
   /* Animation durations (ms) */
-  RAY_EXTEND_DURATION:   2400,
-  ORB_CROSSFADE:         1800,
-  FIGURE_FADE_IN:         800,
-  SIN_ORB_TRAVEL:        1600,
-  SPIRIT_RISE:            900,
-  SPIRIT_DESCEND:         900,
-  CHRIST_RESTORE:         600,
-  HEART_FLOW:            1800,
-  ASSEMBLE_MOVE:         1200,
-  ASSEMBLE_MERGE:         800,
-  ASSEMBLE_HEAD_APPEAR:   500,
+  RAY_EXTEND_DURATION:   3300,
+  ORB_CROSSFADE:         3300,
+  FIGURE_FADE_IN:        3300,
+  SIN_ORB_TRAVEL:        3300,
+  SPIRIT_RISE:           3300,
+  SPIRIT_DESCEND:        3300,
+  CHRIST_RESTORE:        3300,
+  HEART_FLOW:            3300,
+  ASSEMBLE_MOVE:         3300,
+  ASSEMBLE_MERGE:        3300,
+  ASSEMBLE_HEAD_APPEAR:  500,
 
   /* Ring proportions — same structure whether the outer is gold (orb) or teal (Christ/figures) */
-  BAND_RATIO:                 0.15,  /* outer ring width / outer radius — gold band in orb AND teal band in figures */
+  BAND_RATIO:                 0.33,  /* outer ring width / outer radius — gold band in orb AND teal band in figures */
   CENTRE_RATIO:               0.33,  /* inner circle radius / outer radius: teal-in-orb AND gold-in-Christ */
 
   /* Figure proportions
@@ -26,7 +26,8 @@ var CONFIG = {
   HEART_CHEST_RATIO:          0.56,  /* heart radius / body radius — deliberately larger than CENTRE_RATIO */
   SIN_ORB_RATIO:              0.52,  /* sin-orb radius / body radius — deliberately larger than CENTRE_RATIO */
   LARGE_ORB_SCALE:       0.22,   /* orb radius = min(w,h) * this */
-  RAY_TIP_WIDTH:         0.04,   /* ray half-width at tip as fraction of min(w,h) — 0 = hairline, grows outward */
+  ORB_CENTRE_Y:          0.55,   /* vertical centre for beats 3–5 orb/figure, as fraction of h (push down to clear title) */
+  RAY_TIP_WIDTH:         0.07,   /* ray half-width at tip as fraction of min(w,h) — 0 = hairline, grows outward */
 
   /* Layout ratios (fraction of Math.min(w,h) unless noted) */
   FIGURE_STAGGER:        0.12,   /* stagger between figure animations */
