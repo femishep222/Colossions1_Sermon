@@ -26,7 +26,7 @@ var CONFIG = {
   HEART_CHEST_RATIO:          0.56,  /* heart radius / body radius — deliberately larger than CENTRE_RATIO */
   SIN_ORB_RATIO:              0.52,  /* sin-orb radius / body radius — deliberately larger than CENTRE_RATIO */
   LARGE_ORB_SCALE:       0.22,   /* orb radius = min(w,h) * this */
-  ORB_CENTRE_Y:          0.55,   /* vertical centre for beats 3–5 orb/figure, as fraction of h (push down to clear title) */
+  ORB_CENTRE_Y:          0.59,   /* vertical centre for beats 3–5 orb/figure, as fraction of h (push down to clear title) */
   RAY_TIP_WIDTH:         0.07,   /* ray half-width at tip as fraction of min(w,h) — 0 = hairline, grows outward */
 
   /* Layout ratios (fraction of Math.min(w,h) unless noted) */
