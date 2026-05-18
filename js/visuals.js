@@ -12,6 +12,7 @@
   var TEAL      = '#0D9488';
   var TEAL_LT   = '#14B8A6';
   var SIN       = '#3A3A3A';
+  var BLOOD     = '#CC1414';
   var LINE_COL  = '#888888';
   var PASTELS   = ['#E8C4B8', '#F0D5B0', '#D4B896', '#C4D4B8', '#C8C0D8'];
 
@@ -234,13 +235,14 @@
     ctx.restore();
   }
 
-  /* Trinity band labels: FATHER (outer), SPIRIT (middle), SON (centre) at the north position.
-     inverted=true flips colours for the teal-outer figure (orbState3). */
-  function drawOrbLabels(ctx, cx, cy, r, inverted) {
+  /* Trinity band labels: colour is always tied to the person, not position.
+     labels = [outerText, midText, innerText] */
+  function drawOrbLabels(ctx, cx, cy, r, labels) {
     var bandW   = r * CONFIG.BAND_RATIO;
     var innerR  = r * (1 - CONFIG.BAND_RATIO);
     var centreR = r * CONFIG.CENTRE_RATIO;
     var fs      = Math.round(bandW * 0.35);
+    var COL     = { 'FATHER': PEARL, 'SPIRIT': TEAL, 'SON': '#FFFFFF' };
 
     ctx.save();
     ctx.font          = '600 ' + fs + 'px Inter, sans-serif';
@@ -248,14 +250,14 @@
     ctx.textBaseline  = 'middle';
     ctx.letterSpacing = '0.10em';
 
-    ctx.fillStyle = inverted ? PEARL : GOLD_DK;
-    ctx.fillText('FATHER', cx, cy - (r + innerR)  / 2);
+    ctx.fillStyle = COL[labels[0]];
+    ctx.fillText(labels[0], cx, cy - (r + innerR)  / 2);
 
-    ctx.fillStyle = TEAL;
-    ctx.fillText('SPIRIT', cx, cy - (innerR + centreR) / 2);
+    ctx.fillStyle = COL[labels[1]];
+    ctx.fillText(labels[1], cx, cy - (innerR + centreR) / 2);
 
-    ctx.fillStyle = inverted ? GOLD_DK : PEARL;
-    ctx.fillText('SON',    cx, cy);
+    ctx.fillStyle = COL[labels[2]];
+    ctx.fillText(labels[2], cx, cy);
 
     ctx.restore();
   }
@@ -339,8 +341,10 @@
 
   /* ── Beat 3: introduce the orb, full-screen, still ── */
   window.VISUALS.orbIntro = function (ctx, w, h) {
-    var r = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
-    drawOrb(ctx, w / 2, h * CONFIG.ORB_CENTRE_Y, r);
+    var cx = w / 2, cy = h * CONFIG.ORB_CENTRE_Y;
+    var r  = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
+    drawOrb(ctx, cx, cy, r);
+    drawOrbLabels(ctx, cx, cy, r, ['FATHER', 'SPIRIT', 'SON']);
     return null;
   };
 
@@ -479,7 +483,7 @@
       /* Trinity labels — on top of orb and rays */
       ctx.save();
       ctx.globalAlpha = p;
-      drawOrbLabels(ctx, cx, cy, r, false);
+      drawOrbLabels(ctx, cx, cy, r, ['FATHER', 'SPIRIT', 'SON']);
       ctx.restore();
 
       if (p < 1) requestAnimationFrame(frame);
@@ -496,7 +500,7 @@
     var bigR  = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
     var figH  = bigR * 4;
     var figCy = h * CONFIG.ORB_CENTRE_Y - figH * 0.14;
-    var DURATION = 1800;
+    var DURATION = CONFIG.FIGURE_FADE_IN;
     var running = true, t0 = null;
 
     function frame(ts) {
@@ -524,7 +528,7 @@
       /* Trinity labels on body circle — inverted colours (teal outer = FATHER) */
       ctx.save();
       ctx.globalAlpha = p;
-      drawOrbLabels(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR, true);
+      drawOrbLabels(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR, ['SON', 'SPIRIT', 'FATHER']);
       ctx.restore();
 
       if (p < 1) requestAnimationFrame(frame);
@@ -534,7 +538,7 @@
     return function () { running = false; };
   };
 
-  /* ── Beat 5: State 4a — Christ + 5 figures with sin-orbs and lines ── */
+  /* ── Beat 5: State 4a — three phases: cross grows → blood shed → sin revealed ── */
   window.VISUALS.orbState4a = function (ctx, w, h) {
     var cp    = christXY(w, h);
     var figs  = figPositions(w, h);
@@ -544,42 +548,64 @@
     var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
     var crossH  = cSz * CONFIG.CROSS_H_RATIO;
     var crossW  = cSz * CONFIG.CROSS_W_RATIO;
-    var DURATION = 800;
+    var CD = CONFIG.CROSS_DURATION;   /* phase 1 end */
+    var BD = CONFIG.BLOOD_DURATION;   /* phase 2 duration */
+    var FD = 800;                     /* phase 3 duration */
     var running = true, t0 = null;
 
     function frame(ts) {
       if (!running) return;
       if (!t0) t0 = ts;
       var elapsed = ts - t0;
-      var p  = easeOut(Math.min(elapsed / DURATION, 1));
-      var xP = easeOut(Math.min(elapsed / CONFIG.CROSS_DURATION, 1));
+
+      /* Phase progress — each clamped [0,1] */
+      var xP = easeOut(Math.min(elapsed / CD,                        1));  /* cross */
+      var fP = easeOut(Math.min(Math.max(elapsed - CD,      0) / FD, 1));  /* figures */
+      var bP = easeOut(Math.min(Math.max(elapsed - CD - FD, 0) / BD, 1));  /* blood — last */
 
       ctx.clearRect(0, 0, w, h);
+
+      /* Cross — fully grown once phase 1 ends */
       drawCross(ctx, cp.x, cp.y, crossW * xP, crossH * xP, CONFIG.CROSS_LINE_ALPHA, crossLW);
 
-      /* Lines */
+      /* Connection lines — fade in with figures */
       ctx.save();
-      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35 * p;
+      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35 * fP;
       figs.forEach(function (f) {
         ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
       });
       ctx.restore();
 
-      /* Figures */
-      ctx.save(); ctx.globalAlpha = p;
+      /* Figures + sin orbs — phase 2 */
+      ctx.save(); ctx.globalAlpha = fP;
       figs.forEach(function (f, i) {
         drawHuman(ctx, f.x, f.y, fSz, '#555555', PASTELS[i], SIN);
         drawSinOrb(ctx, f.x, chestY(f.y, fSz), sinR);
       });
       ctx.restore();
 
-      /* Christ */
-      ctx.save(); ctx.globalAlpha = p;
+      /* Christ — fades in with the cross */
+      ctx.save(); ctx.globalAlpha = xP;
       ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
       drawChrist(ctx, cp.x, cp.y, cSz);
       ctx.restore();
 
-      if (p < 1 || xP < 1) requestAnimationFrame(frame);
+      /* Blood drops — travel outward from Christ, fade in then dissolve on arrival */
+      if (bP > 0) {
+        ctx.save();
+        ctx.fillStyle   = BLOOD;
+        ctx.globalAlpha = Math.sin(bP * Math.PI);
+        figs.forEach(function (f) {
+          var bx = cp.x + (f.x - cp.x) * bP;
+          var by = cp.y + (f.y - cp.y) * bP;
+          ctx.beginPath();
+          ctx.arc(bx, by, sinR, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      if (xP < 1 || fP < 1 || bP < 1) requestAnimationFrame(frame);
       else running = false;
     }
     requestAnimationFrame(frame);
@@ -655,7 +681,7 @@
 
       /* Spirit: pearl outer, gold centre — rises from Christ */
       if (sP > 0) {
-        var spiritR = cOrbR * 0.85;
+        var spiritR = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
         var spiritY = cp.y - sP * h * 0.22;
         drawSpiritOrb(ctx, cp.x, spiritY, spiritR);
       }
@@ -686,7 +712,7 @@
 
     /* Spirit starts at its risen position from State 4b */
     var spiritStartY = cp.y - h * 0.22;
-    var spiritR      = cOrbR * 0.85;
+    var spiritR      = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
 
     function frame(ts) {
       if (!running) return;

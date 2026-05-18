@@ -64,13 +64,18 @@ var BEATS = [
   {
     id: 'beat-6',
     sectionTitle: 'The Cross: Cost of relationship',
-        scripture: { ref: 'Col 1:21', text: 'And you, who once were alienated and hostile in mind, doing evil deeds...' },
+        scripture: [
+            { ref: 'Col 1:21', text: 'And you, who once were alienated and hostile in mind, doing evil deeds...' },
+            { ref: 'Col 1:18',   text: '...making peace by the blood of his cross.' },
+        ],
     visual: 'orbState4a',
     subBeats: [
       {
         id: 'beat-7',
         sectionTitle: 'The Cross: Our sin vanguished through his death',
-        scripture: { ref: 'Col 1:22', text: '...he has now reconciled in his body of flesh by his death...' },
+        scripture: [
+              { ref: 'Col 1:22', text: '...he has now reconciled in his body of flesh by his death...' },
+        ],
         visual: 'orbState4b',
         subBeats: []
       }

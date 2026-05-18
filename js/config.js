@@ -4,8 +4,8 @@ var CONFIG = {
   /* Animation durations (ms) */
   RAY_EXTEND_DURATION:   3300,
   ORB_CROSSFADE:         3300,
-  FIGURE_FADE_IN:        3300,
-  SIN_ORB_TRAVEL:        3300,
+  FIGURE_FADE_IN:        8800,
+  SIN_ORB_TRAVEL:        5500,
   SPIRIT_RISE:           3300,
   SPIRIT_DESCEND:        3300,
   CHRIST_RESTORE:        3300,
@@ -32,7 +32,8 @@ var CONFIG = {
   CROSS_LINE_SCALE:      0.0175, /* cross line width as fraction of min(w,h) — intentionally heavy */
   CROSS_H_RATIO:         0.50,   /* cross half-height / Christ-figure size (vertical arm) */
   CROSS_W_RATIO:         0.38,   /* cross half-width  / Christ-figure size (horizontal arm, narrower) */
-  CROSS_DURATION:        1200,   /* ms for cross arms to extend from centre */
+  CROSS_DURATION:        2200,   /* ms for cross arms to extend from centre */
+  BLOOD_DURATION:        5500,   /* ms for blood drops to travel from Christ to each figure */
   RAY_TIP_WIDTH:         0.07,   /* ray half-width at tip as fraction of min(w,h) — 0 = hairline, grows outward */
 
   /* Layout ratios (fraction of Math.min(w,h) unless noted) */
