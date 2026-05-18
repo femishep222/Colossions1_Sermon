@@ -219,6 +219,34 @@
     ctx.restore();
   }
 
+  /* Radial love-pulse in the Spirit (pearl) band — oscillates outer↔inner, both directions */
+  function drawSpiritPulse(ctx, cx, cy, r, elapsed) {
+    var centreR = r * CONFIG.CENTRE_RATIO;
+    var innerR  = r * (1 - CONFIG.BAND_RATIO);
+    var full    = (elapsed % CONFIG.SPIRIT_PULSE_MS) / CONFIG.SPIRIT_PULSE_MS;
+    /* cosine oscillation: starts at outer (p=1), moves inward to (p=0), returns to outer */
+    var p       = 0.5 + 0.5 * Math.cos(full * Math.PI * 2);
+    var hw      = 0.20;  /* wave half-width as fraction of band */
+
+    var grad = ctx.createRadialGradient(cx, cy, centreR, cx, cy, innerR);
+    var pC   = Math.min(Math.max(p, 0.001), 0.999);
+    var s0   = Math.max(0, p - hw);
+    var s1   = Math.min(1, p + hw);
+    grad.addColorStop(0,    'rgba(220, 110, 130, 0)');
+    if (s0 > 0.002)  grad.addColorStop(s0,  'rgba(220, 110, 130, 0)');
+    grad.addColorStop(pC,   'rgba(220, 110, 130, 0.28)');
+    if (s1 < 0.998)  grad.addColorStop(s1,  'rgba(220, 110, 130, 0)');
+    grad.addColorStop(1,    'rgba(220, 110, 130, 0)');
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerR,  0, Math.PI * 2, false);
+    ctx.arc(cx, cy, centreR, 0, Math.PI * 2, true);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+  }
+
   /* Very faint teal compass rays — used as lingering background in States 3+ */
   function drawFaintRays(ctx, cx, cy, w, h, alpha, colour, lw) {
     var maxLen = Math.sqrt(w * w + h * h);
@@ -353,13 +381,23 @@
   };
 
 
-  /* ── Beat 3: introduce the orb, full-screen, still ── */
+  /* ── Beat 3: introduce the orb, full-screen, pulsing ── */
   window.VISUALS.orbIntro = function (ctx, w, h) {
     var cx = w / 2, cy = h * CONFIG.ORB_CENTRE_Y;
     var r  = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
-    drawOrb(ctx, cx, cy, r);
-    drawOrbLabels(ctx, cx, cy, r, ['FATHER', 'SPIRIT', 'SON']);
-    return null;
+    var running = true, t0 = null;
+
+    function frame(ts) {
+      if (!running) return;
+      if (!t0) t0 = ts;
+      ctx.clearRect(0, 0, w, h);
+      drawOrb(ctx, cx, cy, r);
+      drawSpiritPulse(ctx, cx, cy, r, ts - t0);
+      drawOrbLabels(ctx, cx, cy, r, ['FATHER', 'SPIRIT', 'SON']);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return function () { running = false; };
   };
 
   /* ── orbState1 — still orb (unused in current beats, kept for reference) ── */
@@ -443,6 +481,7 @@
       ctx.clearRect(0, 0, w, h);
 
       drawOrb(ctx, cx, cy, r);
+      drawSpiritPulse(ctx, cx, cy, r, ts - t0);
 
       var tipHW = Math.min(w, h) * CONFIG.RAY_TIP_WIDTH;
       rays.forEach(function (ray) {
@@ -500,8 +539,7 @@
       drawOrbLabels(ctx, cx, cy, r, ['FATHER', 'SPIRIT', 'SON']);
       ctx.restore();
 
-      if (p < 1) requestAnimationFrame(frame);
-      else running = false;
+      requestAnimationFrame(frame);  /* always continue — pulse runs indefinitely */
     }
     requestAnimationFrame(frame);
     return function () { running = false; };
@@ -529,6 +567,7 @@
       ctx.save();
       ctx.globalAlpha = 1 - p;
       drawOrb(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR);
+      drawSpiritPulse(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR, ts - t0);
       ctx.restore();
 
       /* Figure fading in */
@@ -545,8 +584,7 @@
       drawOrbLabels(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR, ['SON', 'SPIRIT', 'FATHER']);
       ctx.restore();
 
-      if (p < 1) requestAnimationFrame(frame);
-      else running = false;
+      requestAnimationFrame(frame);  /* always continue — pulse runs indefinitely */
     }
     requestAnimationFrame(frame);
     return function () { running = false; };
@@ -1088,6 +1126,12 @@
       ctx.fill();
       ctx.restore();
 
+      /* Spirit pulse in the pearl band — fades in with the orb */
+      ctx.save();
+      ctx.globalAlpha = p;
+      drawSpiritPulse(ctx, orbCx, orbCy, r, ts - t0);
+      ctx.restore();
+
       /* Beat-8 scene shrinks from full-canvas position into orb centre */
       ctx.save();
       ctx.translate(orbCx, curCy);
@@ -1112,8 +1156,7 @@
       ctx.fillText('SONS', orbCx, orbCy);
       ctx.restore();
 
-      if (p < 1) requestAnimationFrame(frame);
-      else running = false;
+      requestAnimationFrame(frame);  /* always continue — pulse runs indefinitely */
     }
 
     requestAnimationFrame(frame);
