@@ -4,6 +4,8 @@ var CONFIG = {
 
   /* ── Durations (ms) ────────────────────────────────────────────────────────
      Roughly in beat order; multi-beat constants at the top                  */
+  AUTO_REPLAY_MS:        33000,  /* ms of inactivity before current beat auto-replays */
+
   ORB_CROSSFADE:         5500,   /* orb state transitions (beats 3–5)        */
   FIGURE_FADE_IN:        8800,   /* figures fading in (beats 4–5)            */
   CROSS_DURATION:        1100,   /* cross arms extend from centre (beat 6)   */

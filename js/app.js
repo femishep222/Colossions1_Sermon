@@ -32,6 +32,12 @@
   var lastWheel    = 0;
   var touchY0      = 0;
   var cancelVisual = null;
+  var replayTimer  = null;
+
+  function scheduleAutoReplay() {
+    if (replayTimer) clearTimeout(replayTimer);
+    replayTimer = setTimeout(function () { replay(); }, CONFIG.AUTO_REPLAY_MS);
+  }
 
   /* ─────────────────────────────────────────────
      DOM REFS
@@ -80,6 +86,7 @@
     renderLeft(beat);
     renderVisual(beat);
     updateNav(i);
+    scheduleAutoReplay();
 
     document.dispatchEvent(new CustomEvent('beat-change', {
       detail: { idx: i, total: FLAT.length, id: beat.id, visual: beat.visual }

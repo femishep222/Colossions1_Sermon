@@ -673,14 +673,14 @@
 
       /* Christ: body drawn first so pearl fill doesn't cover the gold dot */
       drawHuman(ctx, cp.x, cp.y, cSz, TEAL, PEARL, TEAL);
-      if (tP > 0) {
+      if (sP > 0) {
         ctx.save();
-        ctx.globalAlpha = tP;
+        ctx.globalAlpha = sP;
         drawHuman(ctx, cp.x, cp.y, cSz, TEAL, '#0D0D0D', '#0D0D0D');
         ctx.restore();
       }
       ctx.save();
-      ctx.globalAlpha = 1 - tP;
+      ctx.globalAlpha = 1 - sP;
       drawGoldCentre(ctx, cp.x, chestY(cp.y, cSz), cOrbR);
       ctx.restore();
 
@@ -744,15 +744,12 @@
 
       /* Figures */
       figs.forEach(function (f, i) {
-        var figT     = easeOut(Math.min(Math.max((flP - i * 0.10) / 0.3, 0), 1));
-        var stroke   = PASTELS[i];
-        var bFill    = figT > 0.5 ? PEARL : SIN;
-        var hFill    = PASTELS[i];
-        var cy2      = chestY(f.y, fSz);
-        drawHuman(ctx, f.x, f.y, fSz, stroke, bFill, hFill);
+        var hP    = Math.min(Math.max((flP - i * 0.10) / 0.60, 0), 1);
+        var bFill = hP >= 1 ? PEARL : SIN;
+        var cy2   = chestY(f.y, fSz);
+        drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], bFill, PASTELS[i]);
 
         /* Travelling pearl+gold orb, then landed — stagger 0.10 + travel 0.60 ensures all 5 land */
-        var hP = Math.min(Math.max((flP - i * 0.10) / 0.60, 0), 1);
         if (hP > 0 && hP < 1) {
           var tx = cp.x + (f.x - cp.x) * hP;
           var ty = cp.y + (f.y - cp.y) * hP;

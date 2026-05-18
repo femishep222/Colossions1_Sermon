@@ -20,7 +20,12 @@ var BEATS = [
       {
         id: 'beat-2a',
         sectionTitle: 'eikōn = reality',
-        scripture: { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
+        scripture: 
+      [
+        { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
+        { ref: 'John 14:9-10', text: 'Whoever has seen me has seen the Father. How can you say, ‘Show us the Father’? 10 Do you not believe that I am in the Father and the Father is in me?' },
+
+      ],
         visual: 'romaneikon',
         subBeats: []
       }
@@ -32,7 +37,7 @@ var BEATS = [
     sectionTitle: 'The Son: Before all things',
     scripture: [
       { ref: 'Col 1:17',  text: 'He is before all things.' },
-      { ref: 'John 17:5', text: 'Glorify me in your own presence with the glory I had with you before the world existed.' }
+      { ref: 'John 17:5', text: 'No one has ever seen God; the only Son, who is in the bosom of the Father, he has made him known.' }
     ],
     visual: 'orbIntro',
     subBeats: []
@@ -54,8 +59,8 @@ var BEATS = [
     sectionTitle: 'The Image: God Incarnated',
     scripture: [
       { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
-      { ref: 'Col 1:16', text: 'For in him all the fullness of God was pleased to dwell.' },
-      { ref: 'John 1:14', text: 'And the Word became flesh and dwelt among us, and we have seen his glory, glory as of the only Son from the Father, full of grace and truth.' }
+      { ref: 'Col 1:19', text: 'For in him all the fullness of God was pleased to dwell.' },
+      { ref: 'John 1:14', text: 'And the Word became flesh and dwelt among us' },
     ],
     visual: 'orbState3',
     subBeats: []
@@ -66,7 +71,7 @@ var BEATS = [
     sectionTitle: 'The Cross: Cost of relationship',
     scripture: [
       { ref: 'Col 1:21', text: 'And you, who once were alienated and hostile in mind, doing evil deeds...' },
-      { ref: 'Col 1:18', text: '...making peace by the blood of his cross.' },
+      { ref: 'Col 1:20', text: '...making peace by the blood of his cross.' },
     ],
     visual: 'orbState4a',
     subBeats: [
@@ -75,6 +80,8 @@ var BEATS = [
         sectionTitle: 'The Cross: Our sin vanquished through his death',
         scripture: [
           { ref: 'Col 1:22', text: '...he has now reconciled in his body of flesh by his death...' },
+          { ref: 'Matt 27:46', text: 'My God, my God, why have you forsaken me?' },
+          { ref: 'Matt 27:50', text: 'And Jesus cried out again with a loud voice and yielded up his spirit.' },
         ],
         visual: 'orbState4b',
         subBeats: []
@@ -86,8 +93,8 @@ var BEATS = [
     id: 'beat-7',
     sectionTitle: 'The Firstborn from the Dead: Relationship Restored',
     scripture: [
-      { ref: 'Col 1:18',   text: '...in order to present you holy and blameless and above reproach before him' },
-      { ref: '2 Cor 3:18', text: 'We are being transformed into the same image from one degree of glory to another.' }
+      { ref: 'Col 1:22',   text: '...in order to present you holy and blameless and above reproach before him' },
+      { ref: '2 Cor 3:18', text: 'And we all, with unveiled face, beholding the glory of the Lord, are being transformed into the same image' }
     ],
     visual: 'orbState5',
     subBeats: []
@@ -117,7 +124,9 @@ var BEATS = [
   {
     id: 'beat-9',
     sectionTitle: 'The Fullness: Father, Spirit, Son',
-    scripture: null,
+        scripture: [
+          { ref: 'John 14:2', text: 'In my Father\'s house are many rooms. If it were not so, would I have told you that I go to prepare a place for you?' },
+        ],
     visual: 'orbFull',
     subBeats: []
   }
