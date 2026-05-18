@@ -567,8 +567,10 @@
       ctx.save();
       ctx.globalAlpha = 1 - p;
       drawOrb(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR);
-      drawSpiritPulse(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR, ts - t0);
       ctx.restore();
+
+      /* Spirit pulse — independent of orb fade, continues after transition */
+      drawSpiritPulse(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR, ts - t0);
 
       /* Figure fading in */
       ctx.save();

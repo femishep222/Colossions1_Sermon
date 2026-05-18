@@ -23,7 +23,7 @@ var BEATS = [
         scripture: 
       [
         { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
-        { ref: 'John 14:9-10', text: 'Whoever has seen me has seen the Father. How can you say, ‘Show us the Father’? 10 Do you not believe that I am in the Father and the Father is in me?' },
+        { ref: 'John 14:9-10', text: 'Whoever has seen me has seen the Father. How can you say, ‘Show us the Father’? Do you not believe that I am in the Father and the Father is in me?' },
 
       ],
         visual: 'romaneikon',
@@ -37,7 +37,7 @@ var BEATS = [
     sectionTitle: 'The Son: Before all things',
     scripture: [
       { ref: 'Col 1:17',  text: 'He is before all things.' },
-      { ref: 'John 17:5', text: 'No one has ever seen God; the only Son, who is in the bosom of the Father, he has made him known.' }
+      { ref: 'John 1:18', text: 'the only Son, who is in the bosom of the Father' }
     ],
     visual: 'orbIntro',
     subBeats: []
