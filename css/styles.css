@@ -64,9 +64,9 @@ body {
   min-height: 0;
 }
 
-/* Left panel — 1/3 */
+/* Left panel — 1/2 */
 #story-left {
-  flex: 0 0 33.33%;
+  flex: 0 0 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -95,7 +95,7 @@ body {
 #scripture-block {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
+  gap: 2.5rem;
 }
 
 /* Each scripture entry (ref + text) */
@@ -125,29 +125,30 @@ body {
 .scripture-ref {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  font-size: 0.65rem;
+  font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #8B6914;
+  color: #7A5C10;
   animation: goldShimmer 3s ease-in-out infinite;
 }
 
 .scripture-text {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-style: italic;
-  font-size: 1.2rem;
-  line-height: 1.6;
-  color: #3C2F1E;
-}
-
-/* Second scripture — slightly dimmed */
-.scripture-item + .scripture-item .scripture-ref {
-  color: #7A5C10;
-}
-
-.scripture-item + .scripture-item .scripture-text {
+  font-size: 2.5rem;
+  line-height: 1.5;
   color: #5C4A32;
-  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* Colossians verses — darker and heavier */
+.scripture-item.is-col .scripture-ref {
+  color: #8B6914;
+}
+
+.scripture-item.is-col .scripture-text {
+  color: #3C2F1E;
+  font-weight: 600;
 }
 
 /* ─────────────────────────────────────────────

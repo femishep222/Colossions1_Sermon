@@ -6,8 +6,8 @@ var CONFIG = {
      Roughly in beat order; multi-beat constants at the top                  */
   ORB_CROSSFADE:         5500,   /* orb state transitions (beats 3–5)        */
   FIGURE_FADE_IN:        8800,   /* figures fading in (beats 4–5)            */
-  CROSS_DURATION:        2200,   /* cross arms extend from centre (beat 6)   */
-  BLOOD_DURATION:        6600,   /* blood drops travel Christ → figures (beat 6) */
+  CROSS_DURATION:        1100,   /* cross arms extend from centre (beat 6)   */
+  BLOOD_DURATION:        9900,   /* blood drops travel Christ → figures (beat 6) */
   SIN_ORB_TRAVEL:        9900,   /* sin orbs travel figures → Christ (beat 6a) */
   SPIRIT_RISE:           5500,   /* Spirit rises from Christ (beat 6a)       */
   SPIRIT_DESCEND:        5500,   /* Spirit descends back to Christ (beat 7)  */

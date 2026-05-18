@@ -98,7 +98,7 @@
     var items = Array.isArray(beat.scripture) ? beat.scripture : [beat.scripture];
     items.forEach(function (item) {
       var wrapper = document.createElement('div');
-      wrapper.className = 'scripture-item';
+      wrapper.className = 'scripture-item' + (/^col/i.test(item.ref) ? ' is-col' : '');
 
       var ref = document.createElement('p');
       ref.className   = 'scripture-ref';
