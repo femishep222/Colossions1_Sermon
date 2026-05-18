@@ -1,5 +1,5 @@
 /* beats-config.js — beat data only, no logic */
-/* Beat IDs match the counter displayed in the UI (beat-1 = "1 · 10", beat-10 = "10 · 10") */
+/* Sub-beats use letter suffixes (beat-6a, beat-9a); counter logic lives in app.js */
 
 var BEATS = [
 
@@ -21,7 +21,7 @@ var BEATS = [
         id: 'beat-2a',
         sectionTitle: 'eikōn = reality',
         scripture: { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
-        visual: 'imageLakeReflection',
+        visual: 'romaneikon',
         subBeats: []
       }
     ]
@@ -54,8 +54,8 @@ var BEATS = [
     sectionTitle: 'The Image: God Incarnated',
     scripture: [
       { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
-      { ref: 'Col 1:16', text: 'For in him all the fullness of God was pleased to dwell.'},
-      { ref: 'John 1:14',    text: 'And the Word became flesh and dwelt among us, and we have seen his glory, glory as of the only Son from the Father, full of grace and truth.' }
+      { ref: 'Col 1:16', text: 'For in him all the fullness of God was pleased to dwell.' },
+      { ref: 'John 1:14', text: 'And the Word became flesh and dwelt among us, and we have seen his glory, glory as of the only Son from the Father, full of grace and truth.' }
     ],
     visual: 'orbState3',
     subBeats: []
@@ -64,17 +64,17 @@ var BEATS = [
   {
     id: 'beat-6',
     sectionTitle: 'The Cross: Cost of relationship',
-        scripture: [
-            { ref: 'Col 1:21', text: 'And you, who once were alienated and hostile in mind, doing evil deeds...' },
-            { ref: 'Col 1:18',   text: '...making peace by the blood of his cross.' },
-        ],
+    scripture: [
+      { ref: 'Col 1:21', text: 'And you, who once were alienated and hostile in mind, doing evil deeds...' },
+      { ref: 'Col 1:18', text: '...making peace by the blood of his cross.' },
+    ],
     visual: 'orbState4a',
     subBeats: [
       {
-        id: 'beat-7',
-        sectionTitle: 'The Cross: Our sin vanguished through his death',
+        id: 'beat-6a',
+        sectionTitle: 'The Cross: Our sin vanquished through his death',
         scripture: [
-              { ref: 'Col 1:22', text: '...he has now reconciled in his body of flesh by his death...' },
+          { ref: 'Col 1:22', text: '...he has now reconciled in his body of flesh by his death...' },
         ],
         visual: 'orbState4b',
         subBeats: []
@@ -83,7 +83,7 @@ var BEATS = [
   },
 
   {
-    id: 'beat-8',
+    id: 'beat-7',
     sectionTitle: 'The Firstborn from the Dead: Relationship Restored',
     scripture: [
       { ref: 'Col 1:18',   text: '...in order to present you holy and blameless and above reproach before him' },
@@ -94,24 +94,32 @@ var BEATS = [
   },
 
   {
-    id: 'beat-9',
+    id: 'beat-8',
     sectionTitle: 'The Head: A Holy, Blameless Church',
     scripture: [
-      { ref: 'Col 1:16–17', text: 'And he is the head of the body, the church.' },
+      { ref: 'Col 1:18', text: 'And he is the head of the body, the church.' },
     ],
     visual: 'orbState5Held',
     subBeats: [
       {
-        id: 'beat-10',
+        id: 'beat-8a',
         sectionTitle: 'The Hope of the Gospel: All things reconciled to Him',
-    scripture: [
-            { ref: 'Col 1:16–17', text: 'and through him to reconcile to himself all things, whether on earth or in heaven, making peace by the blood of his cross.' },
-            { ref: 'Col 1:16–17', text: 'If indeed you continue in the faith, stable and steadfast, not shifting from the hope of the gospel that you heard, which has been proclaimed in all creation under heaven' },
-    ],
+        scripture: [
+          { ref: 'Col 1:20', text: '...and through him to reconcile to himself all things, whether on earth or in heaven, making peace by the blood of his cross.' },
+          { ref: 'Col 1:23', text: 'If indeed you continue in the faith, stable and steadfast, not shifting from the hope of the gospel that you heard, which has been proclaimed in all creation under heaven.' },
+        ],
         visual: 'orbStateAll',
         subBeats: []
       }
     ]
+  },
+
+  {
+    id: 'beat-9',
+    sectionTitle: 'The Fullness: Father, Spirit, Son',
+    scripture: null,
+    visual: 'orbFull',
+    subBeats: []
   }
 
 ];

@@ -15,9 +15,14 @@
      parent, giving a simple linear sequence.
   ───────────────────────────────────────────── */
   var FLAT = [];
-  BEATS.forEach(function (beat) {
+  var TOTAL_MAIN = BEATS.length;   /* top-level beat count — denominator in counter */
+  BEATS.forEach(function (beat, i) {
+    beat._label = String(i + 1);
     FLAT.push(beat);
-    (beat.subBeats || []).forEach(function (sub) { FLAT.push(sub); });
+    (beat.subBeats || []).forEach(function (sub, j) {
+      sub._label = String(i + 1) + String.fromCharCode(97 + j);  /* "2a", "6a", "8a" … */
+      FLAT.push(sub);
+    });
   });
 
   /* ─────────────────────────────────────────────
@@ -129,7 +134,7 @@
      BEAT COUNTER + NAV BUTTONS
   ───────────────────────────────────────────── */
   function updateNav(i) {
-    if (counter) counter.textContent = (i + 1) + ' \xb7 ' + FLAT.length;
+    if (counter) counter.textContent = FLAT[i]._label + ' \xb7 ' + TOTAL_MAIN;
     if (navPrev) navPrev.disabled = (i === 0);
     if (navNext) navNext.disabled = (i === FLAT.length - 1);
   }
