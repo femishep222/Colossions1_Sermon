@@ -19,10 +19,10 @@
   var stage      = 1;
   var lastWheel  = 0;
   var touchY0    = 0;
-  var cancelVisual  = null;
-  var currentVisual = null;  /* visual key currently rendered on canvas */
-  var prevBeatIdx   = -1;    /* beatIdx as of the last goStage call */
-  var replayTimer   = null;
+  var cancelVisual    = null;
+  var currentVisual   = null;  /* visual key currently rendered on canvas */
+  var prevBeatIdx     = -1;    /* beatIdx as of the last goStage call */
+  var autoAdvTimer    = null;  /* setTimeout handle for stage-1 auto-advance */
 
   /* ─────────────────────────────────────────────
      DOM REFS
@@ -53,6 +53,20 @@
   }
 
   /* ─────────────────────────────────────────────
+     STAGE-1 AUTO-ADVANCE
+  ───────────────────────────────────────────── */
+  function clearAutoAdv() {
+    if (autoAdvTimer !== null) { clearTimeout(autoAdvTimer); autoAdvTimer = null; }
+  }
+
+  function scheduleAutoAdv() {
+    clearAutoAdv();
+    if (CONFIG.STAGE1_AUTO_ADVANCE_MS > 0) {
+      autoAdvTimer = setTimeout(function () { autoAdvTimer = null; advance(1); }, CONFIG.STAGE1_AUTO_ADVANCE_MS);
+    }
+  }
+
+  /* ─────────────────────────────────────────────
      BLACK SCREEN HELPERS
   ───────────────────────────────────────────── */
   function paintBlack() {
@@ -63,6 +77,7 @@
   }
 
   function enterBlackout() {
+    clearAutoAdv();
     document.body.classList.add('is-blackout');
     paintBlack();
     if (counter)  counter.textContent  = '';
@@ -72,16 +87,6 @@
 
   function exitBlackout() {
     document.body.classList.remove('is-blackout');
-  }
-
-  /* ─────────────────────────────────────────────
-     AUTO REPLAY
-  ───────────────────────────────────────────── */
-  function scheduleAutoReplay() {
-    if (replayTimer) clearTimeout(replayTimer);
-    replayTimer = setTimeout(function () {
-      if (phase === 'active') renderVisualForBeat(BEATS[beatIdx]);
-    }, CONFIG.AUTO_REPLAY_MS);
   }
 
   /* ─────────────────────────────────────────────
@@ -95,6 +100,7 @@
   function prev() { advance(-1); }
 
   function advance(dir) {
+    clearAutoAdv();
     if (dir > 0) {
       if (phase === 'outro') return;
 
@@ -169,17 +175,17 @@
     if (stage === 1) {
       renderScriptureSlot(scriptureTop, beat.scriptureA);
       renderScriptureSlot(scriptureBot, null);
-      /* cross-beat same visual → leave running; otherwise clear (stage a is pre-visual) */
-      if (!(beatChanged && beat.visual === currentVisual)) {
+      /* cross-beat same visual or persistVisual → leave running; otherwise clear */
+      if (!(beatChanged && (beat.visual === currentVisual || beat.persistVisual))) {
         if (cancelVisual) { cancelVisual(); cancelVisual = null; }
         currentVisual = null;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
+      scheduleAutoAdv();
     } else if (stage === 2) {
       renderScriptureSlot(scriptureTop, beat.scriptureA);
       renderScriptureSlot(scriptureBot, null);
       renderVisualForBeat(beat);
-      scheduleAutoReplay();
     } else {
       renderScriptureSlot(scriptureTop, beat.scriptureA);
       renderScriptureSlot(scriptureBot, beat.scriptureB);

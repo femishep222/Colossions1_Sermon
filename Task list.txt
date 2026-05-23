@@ -1,41 +1,21 @@
-Q: What did he achieve in his life? Showed us what a good life looks like! Longer sermon.
-Q: What did he have to DIE though? A: mangitude of sin too much (delta visual)! S: He has now reconciled in his body of flesh by his death in order to present us blameless”
 
-
-
-
-
-
-Do we need speach marks?
-Inside outy visual
-Split LHS panel (Q scripture vs A scripture). 
-New flow within beats: LHS top scripture (even if blank) --> RHS visual --> LHS bottom scripture (even if blank)
-
-
-
-shortcut for full screen on mac?
+Code:
+- The Spirit radiation still not working in incarnation...
 - ⁠wanted picture of rifle
-- ⁠really well broken down: few firsts. Christ gave up His Spirit. 
-- ⁠felt like he wanted to go into the Word and see sheet music jump in the page
+- simpler eikon image. Symbolic.
+
+Sermon - Prep: 
+- ⁠double check on giving up his spirit. Certainly forsaken by father but was spirit referring to life? Check translation and commentary. 
+- ⁠add a summary at the end. What’s the big takeaway. Write a bang out line so dont Peter oht at the end. Have you been struggling to see God? You can see him in nature, in physics, in the word and see him now.
 - ⁠tell them the big idea early on: Paul explaining a big project of all time. Massive vision. 
+- ⁠maybe add personal story at the end. Full circle hook.
+
+Day of:
 - ⁠scripture reading is in Vietnamese so no one will be paying attention. Dont rush. Take time to read scripture - slowly and confidently, reintroduce it to people hearing for first time
 - ⁠if I have any important points, say them TWICE. Read all scriptures twice too. 
 - hibachi chef - surprising in plain site.
-
 - ⁠goal: want everyone to be inspired by the son of God. Especially word - Logos part. with the black hole stuff. repeat more of this. Something that’s incomprehensible but awe inspiring. Flex on the stuff I find interesting. 
-
-- ⁠all builds up to the cross. Need to nail this transition from Christs build up as creator to the cross. Maybe use a question as a transition?
-- ⁠double check on giving up his spirit. Certainly forsaken by father but was spirit referring to life? Check translation and commentary. 
-- ⁠make slide wording much more readable. Get rid of top part. Make font bigger, more legible font. Simpler images. 
-- ⁠simplify slide progress. 
-- ⁠give slides team my manuscript. Send as a word doc in slides channel.
-- ⁠make clearer that image of emporer could also be statue/banner thing not just his drawing image
-- ⁠beat 9 - SON vs SONS
-- ⁠application: loved this; Need to spend more time on this.
-- ⁠spend a bit more time on everything. I 24 minutes. 
-- ⁠some slight scripture rearranging that I noticed was needed 
 - ⁠connecting where I am in the passage. Pause. Recite the passage. Then say it. 
-- ⁠add a summary at the end. What’s the big takeaway. Write a bang out line so dont Peter oht at the end. Have you been struggling to see God? You can see him in nature, in physics, in the word and see him now.
-- ⁠maybe add personal story at the end. Full circle hook.
-- ⁠make first and last slides black.
-- ⁠find out how to go full screen in chrome + safari on a Mac
+
+Tech: 
+- Send html link (presentation) + doc (notes) + shortcut for full screen (on mac or PC)?

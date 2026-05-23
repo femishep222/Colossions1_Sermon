@@ -438,7 +438,7 @@
     var cx = w / 2, cy = h * CONFIG.ORB_CENTRE_Y;
     var r  = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
     var maxLen = Math.sqrt(w * w + h * h) * 0.54;
-    var DURATION = 3300;
+    var DURATION = CONFIG.ANIM_DURATION * 0.6;
     var running = true, t0 = null;
 
     var TAGS = ['star', 'eq', 'wave', 'dna', 'cross'];
@@ -627,10 +627,24 @@
       drawChrist(ctx, cx, figCy, figH);
       ctx.restore();
 
-      /* Trinity labels on body circle — inverted colours (teal outer = FATHER) */
+      /* Trinity labels — SPIRIT in band, FATHER in orb centre, SON at Christ's head */
       ctx.save();
       ctx.globalAlpha = p;
-      drawOrbLabels(ctx, cx, orbCy, bigR, ['SON', 'SPIRIT', 'FATHER']);
+      var lBandW   = bigR * CONFIG.BAND_RATIO;
+      var lInnerR  = bigR * (1 - CONFIG.BAND_RATIO);
+      var lCentreR = bigR * CONFIG.CENTRE_RATIO;
+      var lHeadR   = bigR * CONFIG.CENTRE_RATIO;         /* head radius = same ratio as body centre */
+      var lHeadCy  = orbCy - bigR - bigR * CONFIG.HEAD_GAP_RATIO - lHeadR;
+      var lFs      = Math.round(lBandW * 0.35);
+      ctx.font          = '600 ' + lFs + 'px Inter, sans-serif';
+      ctx.textAlign     = 'center';
+      ctx.textBaseline  = 'middle';
+      ctx.letterSpacing = '0.10em';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('SPIRIT', cx, orbCy - (lInnerR + lCentreR) / 2);
+      ctx.fillText('FATHER', cx, orbCy);
+      ctx.fillStyle = PEARL;
+      ctx.fillText('SON', cx, lHeadCy);
       ctx.restore();
 
       requestAnimationFrame(frame);  /* always continue — pulse runs indefinitely */
@@ -648,26 +662,19 @@
     var fSz   = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz   = Math.min(w, h) * CONFIG.CHRIST_SIZE;
     var sinR  = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
-    var FD = 800;
+    var FD = CONFIG.ANIM_DURATION * 0.15;
     var running = true, t0 = null;
 
     function frame(ts) {
       if (!running) return;
       if (!t0) t0 = ts;
       var elapsed = ts - t0;
+      var cDelay = CONFIG.ANIM_DURATION * 0.07;
 
-      var cP = easeOut(Math.min(elapsed / 400, 1));          /* Christ fades in */
-      var fP = easeOut(Math.min(Math.max(elapsed - 400, 0) / FD, 1));  /* figures */
+      var cP = easeOut(Math.min(elapsed / cDelay, 1));          /* Christ fades in */
+      var fP = easeOut(Math.min(Math.max(elapsed - cDelay, 0) / FD, 1));  /* figures */
 
       ctx.clearRect(0, 0, w, h);
-
-      /* Connection lines — fade in with figures */
-      ctx.save();
-      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35 * fP;
-      figs.forEach(function (f) {
-        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
-      });
-      ctx.restore();
 
       /* Figures + sin orbs */
       ctx.save(); ctx.globalAlpha = fP;
@@ -749,7 +756,7 @@
     var crossH  = cSz * CONFIG.CROSS_H_RATIO;
     var crossW  = cSz * CONFIG.CROSS_W_RATIO;
     var BD           = CONFIG.BLOOD_DURATION;
-    var T_SIN_START  = 1000;
+    var T_SIN_START  = CONFIG.ANIM_DURATION * 0.18;
     var T_END        = T_SIN_START + CONFIG.SIN_ORB_TRAVEL;
     var running = true, t0 = null;
 
@@ -805,7 +812,7 @@
       drawGoldCentre(ctx, cp.x, chestY(cp.y, cSz), cOrbR);
 
       if (el < T_END) requestAnimationFrame(frame);
-      else running = false;
+      else { t0 = null; requestAnimationFrame(frame); }  /* loop */
     }
     requestAnimationFrame(frame);
     return function () { running = false; };
@@ -872,12 +879,12 @@
     var spiritStartY = h * 0.06;
     var spiritR      = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
 
-    /* Phase timing (ms) */
-    var T_SPIRIT     = 2500;                    /* spirit descends full distance    */
-    var T_RESTORE    = T_SPIRIT + 500;          /* Christ colour restores           */
-    var T_ASCEND     = T_RESTORE + 100;         /* Christ begins rising             */
-    var T_ASCEND_END = T_ASCEND + 1600;         /* Christ reaches natural height    */
-    var T_FLOW       = T_ASCEND_END + 300;      /* gold dots begin flowing outward  */
+    /* Phase timing (ms) — all derived from ANIM_DURATION */
+    var T_SPIRIT     = CONFIG.ANIM_DURATION * 0.45;                        /* spirit descends full distance    */
+    var T_RESTORE    = T_SPIRIT     + CONFIG.ANIM_DURATION * 0.09;         /* Christ colour restores           */
+    var T_ASCEND     = T_RESTORE    + CONFIG.ANIM_DURATION * 0.02;         /* Christ begins rising             */
+    var T_ASCEND_END = T_ASCEND     + CONFIG.ANIM_DURATION * 0.29;         /* Christ reaches natural height    */
+    var T_FLOW       = T_ASCEND_END + CONFIG.ANIM_DURATION * 0.05;         /* gold dots begin flowing outward  */
     var T_END        = T_FLOW + CONFIG.SPIRIT_FLOW;
     var running      = true, t0 = null;
 
@@ -887,8 +894,8 @@
       var el = ts - t0;
 
       var spP  = easeOut(Math.min(el / T_SPIRIT, 1));
-      var reP  = easeOut(Math.min(Math.max((el - T_SPIRIT) / 500, 0), 1));
-      var asP  = easeOut(Math.min(Math.max((el - T_ASCEND) / 1600, 0), 1));
+      var reP  = easeOut(Math.min(Math.max((el - T_SPIRIT)  / (CONFIG.ANIM_DURATION * 0.09), 0), 1));
+      var asP  = easeOut(Math.min(Math.max((el - T_ASCEND)  / (CONFIG.ANIM_DURATION * 0.29), 0), 1));
       var flP  = easeOut(Math.min(Math.max((el - T_FLOW) / CONFIG.SPIRIT_FLOW, 0), 1));
 
       /* Christ position animates from bottom to natural height during ascent phase */
@@ -976,7 +983,7 @@
     var fSz = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz = Math.min(w, h) * CONFIG.CHRIST_SIZE;
 
-    var aBodyR  = Math.min(w, h) * 0.22;
+    var aBodyR  = Math.min(w, h) * 0.28;
     var aBodyCx = w / 2;
     /* top of ring = bottom of Christ body + HEAD_GAP_RATIO × Christ body-radius */
     var christBodyBottom = cp.y + cSz * (0.14 + 0.25);
@@ -991,8 +998,8 @@
                y: aBodyCy + aBodyR * Math.sin(ANGLES[i]) };
     });
 
-    var T_MOVE = 1200;
-    var T_RING = T_MOVE + 700;
+    var T_MOVE = CONFIG.ANIM_DURATION * 0.22;
+    var T_RING = T_MOVE + CONFIG.ANIM_DURATION * 0.13;
 
     var running = true, t0 = null;
 
@@ -1001,7 +1008,7 @@
       if (!t0) t0 = ts;
       var el  = ts - t0;
       var mvP = easeOut(Math.min(el / T_MOVE, 1));
-      var rnP = easeOut(Math.min(Math.max((el - T_MOVE) / 700, 0), 1));
+      var rnP = easeOut(Math.min(Math.max((el - T_MOVE) / (CONFIG.ANIM_DURATION * 0.13), 0), 1));
 
       ctx.clearRect(0, 0, w, h);
       drawFaintRays(ctx, cp.x, cp.y, w, h, 0.07);
@@ -1096,7 +1103,7 @@
       drawAssembledBody(ctx, cp, aBodyCx, aBodyCy, aBodyR, targets, fSz, cSz);
     }
 
-    var DURATION = 1600;
+    var DURATION = CONFIG.ANIM_DURATION * 0.29;
     var running = true, t0 = null;
 
     function frame(ts) {
