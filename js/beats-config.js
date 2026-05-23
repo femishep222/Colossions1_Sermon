@@ -46,8 +46,8 @@ var BEATS = [
     id: 6,
     visual: 'orbState3',
     persistVisual: true,
-    scriptureA: { ref: 'John 1:14', text: 'Incarnation.' },
-    scriptureB: { ref: 'John 14:9–10', text: 'Whoever has seen me has seen the Father. How can you say, \'Show us the Father\'? Do you not believe that I am in the Father and the Father is in me?' }
+    scriptureA: { ref: 'John 14:8', text: 'Philip said to him, “Lord, show us the Father, and it is enough for us.”' },
+    scriptureB: { ref: 'John 14:9–10', text: '"Whoever has seen me has seen the Father. How can you say, \'Show us the Father\'? Do you not believe that I am in the Father and the Father is in me?"', crimson: true  }
   },
 
   {
@@ -70,7 +70,7 @@ var BEATS = [
     id: 9,
     visual: 'orbState4bPhase1',
     persistVisual: true,
-    scriptureA: { ref: 'John 1:14', text: 'The exchange?' },
+    scriptureA: { text: 'The exchange?', provocation: true },
     scriptureB: { ref: 'Matt 26:28', text: '…for this is my blood of the covenant, which is poured out for many for the forgiveness of sins.' }
   },
 
@@ -121,7 +121,7 @@ var BEATS = [
     id: 15,
     visual: 'orbFull',
     persistVisual: true,
-    scriptureA: { ref: 'John 14:2', text: 'In my Father\'s house are many rooms. If it were not so, would I have told you that I go to prepare a place for you?' },
+    scriptureA: { ref: 'John 14:2', text: '"In my Father\'s house are many rooms. If it were not so, would I have told you that I go to prepare a place for you?"', crimson: true },
     scriptureB: null
   }
 
