@@ -659,30 +659,31 @@
     return function () { running = false; };
   };
 
-  /* ── Beat 5: State 4a — three phases: cross grows → blood shed → sin revealed ── */
+  /* ── Beat 5: State 4a — figures appear; Christ descends from top to bottom ── */
   window.VISUALS.orbState4a = function (ctx, w, h) {
-    var cp    = christXY(w, h);
+    var cpX      = w * 0.5;
+    var cpStartY = h * CONFIG.CHRIST_Y;    /* top — mirrors beat-11 end position */
+    var cpEndY   = h * CONFIG.FIGURES_Y;   /* bottom — rest position */
     var figs  = figPositions(w, h);
-    cp.y = h * CONFIG.FIGURES_Y;
     figs.forEach(function (f) { f.y = h * 0.46; });
-    var fSz   = Math.min(w, h) * CONFIG.FIGURE_SIZE;
-    var cSz   = Math.min(w, h) * CONFIG.CHRIST_SIZE;
-    var sinR  = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
-    var FD = CONFIG.ANIM_DURATION * 0.15;
+    var fSz  = Math.min(w, h) * CONFIG.FIGURE_SIZE;
+    var cSz  = Math.min(w, h) * CONFIG.CHRIST_SIZE;
+    var sinR = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
+    var FD   = CONFIG.ANIM_DURATION * 0.15;   /* figures fade duration */
+    var TD   = CONFIG.ANIM_DURATION * 0.22;   /* Christ travel duration */
     var running = true, t0 = null;
 
     function frame(ts) {
       if (!running) return;
       if (!t0) t0 = ts;
       var elapsed = ts - t0;
-      var cDelay = CONFIG.ANIM_DURATION * 0.07;
-
-      var fP = easeOut(Math.min(elapsed / FD, 1));                          /* figures fade in first */
-      var cP = easeOut(Math.min(Math.max(elapsed - FD, 0) / cDelay, 1));  /* Christ follows */
+      var fP      = easeOut(Math.min(elapsed / FD, 1));
+      var travelP = easeOut(Math.min(elapsed / TD, 1));
+      var cpCurY  = cpStartY + (cpEndY - cpStartY) * travelP;
 
       ctx.clearRect(0, 0, w, h);
 
-      /* Figures + sin orbs */
+      /* Figures + sin orbs — fade in */
       ctx.save(); ctx.globalAlpha = fP;
       figs.forEach(function (f, i) {
         drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
@@ -690,13 +691,13 @@
       });
       ctx.restore();
 
-      /* Christ */
-      ctx.save(); ctx.globalAlpha = cP;
+      /* Christ — descends from top to bottom, full opacity throughout */
+      ctx.save();
       ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
-      drawChrist(ctx, cp.x, cp.y, cSz);
+      drawChrist(ctx, cpX, cpCurY, cSz);
       ctx.restore();
 
-      if (cP < 1 || fP < 1) requestAnimationFrame(frame);
+      if (travelP < 1 || fP < 1) requestAnimationFrame(frame);
       else running = false;
     }
     requestAnimationFrame(frame);

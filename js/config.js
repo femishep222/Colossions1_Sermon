@@ -5,7 +5,7 @@ var CONFIG = {
   /* ── Master duration dial ───────────────────────────────────────────────── */
   ANIM_DURATION:          13000,  /* scale all animation durations — one knob to rule them all */
   SPIRIT_PULSE_MS:        12000,  /* Spirit band pulse period — runs independently of animations */
-  STAGE1_AUTO_ADVANCE_MS:  4000,  /* ms after scriptureA appears before visual auto-plays (0 = off) */
+  STAGE1_AUTO_ADVANCE_MS: 13000,  /* ms after scriptureA appears before visual auto-plays (0 = off) */
 
   /* ── Orb & ring proportions ────────────────────────────────────────────── */
   BAND_RATIO:            0.33,   /* outer ring width / outer radius (gold orb + figure bodies) */

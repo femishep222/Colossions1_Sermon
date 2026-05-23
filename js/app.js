@@ -10,11 +10,11 @@
 
   /* ─────────────────────────────────────────────
      STATE
-     phase:   'active' | 'outro'
+     phase:   'intro' | 'active' | 'outro'
      beatIdx: 0-based index into BEATS
      stage:   1 | 2 | 3  (only meaningful when active)
   ───────────────────────────────────────────── */
-  var phase      = 'active';
+  var phase      = 'intro';
   var beatIdx    = 0;
   var stage      = 1;
   var lastWheel  = 0;
@@ -43,7 +43,7 @@
   function sizeCanvas() {
     canvas.width  = storyRight.offsetWidth;
     canvas.height = storyRight.offsetHeight;
-    if (phase === 'outro') {
+    if (phase === 'intro' || phase === 'outro') {
       paintBlack();
     } else if (currentVisual) {
       /* re-render the running visual (canvas was cleared by resize) */
@@ -80,9 +80,7 @@
     clearAutoAdv();
     document.body.classList.add('is-blackout');
     paintBlack();
-    if (counter)  counter.textContent  = '';
-    if (navPrev)  navPrev.disabled     = true;
-    if (navNext)  navNext.disabled     = true;
+    updateNav();  /* nav state depends on whether we entered intro or outro */
   }
 
   function exitBlackout() {
@@ -102,6 +100,16 @@
   function advance(dir) {
     clearAutoAdv();
     if (dir > 0) {
+      /* intro → first beat */
+      if (phase === 'intro') {
+        exitBlackout();
+        phase  = 'active';
+        beatIdx = 0;
+        stage  = firstStage(BEATS[0]);
+        goStage();
+        return;
+      }
+
       if (phase === 'outro') return;
 
       var beat = BEATS[beatIdx];
@@ -139,6 +147,13 @@
         return;
       }
 
+      /* at the very first stage — step back into intro blackout */
+      if (beatIdx === 0 && stage === firstStage(BEATS[0])) {
+        phase = 'intro';
+        enterBlackout();
+        return;
+      }
+
       var beat = BEATS[beatIdx];
       if (stage === 3) {
         stage = 2;
@@ -152,14 +167,12 @@
           stage = lastStage(BEATS[beatIdx]);
           goStage();
         }
-        /* else: at beat 0 with no scriptureA — nowhere to go back, navPrev is disabled */
       } else {
         if (beatIdx > 0) {
           beatIdx--;
           stage = lastStage(BEATS[beatIdx]);
           goStage();
         }
-        /* else: at beat 0 stage 1 — nowhere to go back, navPrev is disabled */
       }
     }
   }
@@ -251,10 +264,16 @@
      BEAT COUNTER + NAV BUTTONS
   ───────────────────────────────────────────── */
   function updateNav() {
+    if (phase === 'intro' || phase === 'outro') {
+      if (counter) counter.textContent = '';
+      if (navPrev) navPrev.disabled = (phase === 'intro');   /* can go back in outro, not intro */
+      if (navNext) navNext.disabled = (phase === 'outro');   /* can go forward in intro, not outro */
+      return;
+    }
     var beat = BEATS[beatIdx];
     var stageLetter = ['a', 'b', 'c'][stage - 1];
     if (counter) counter.textContent = beat.id + stageLetter + ' \xb7 ' + BEATS.length;
-    if (navPrev) navPrev.disabled = (beatIdx === 0 && stage === firstStage(BEATS[0]));
+    if (navPrev) navPrev.disabled = false;  /* prev always leads somewhere — intro blackout at minimum */
     if (navNext) navNext.disabled = false;
   }
 
@@ -306,11 +325,11 @@
      INIT
   ───────────────────────────────────────────── */
   function init() {
-    document.body.classList.remove('is-blackout');  /* clear any stale blackout from bfcache */
     attachListeners();
-    stage = firstStage(BEATS[0]);
+    beatIdx = 0;
+    stage   = firstStage(BEATS[0]);
     sizeCanvas();
-    goStage();
+    enterBlackout();  /* always start in intro blackout */
   }
 
   document.addEventListener('DOMContentLoaded', init);

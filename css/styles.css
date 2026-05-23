@@ -52,7 +52,9 @@ body {
 #scripture-bottom {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 0.45rem;
+  flex: 1;
   min-height: 0;
 }
 
@@ -223,13 +225,16 @@ body {
 }
 
 /* ─────────────────────────────────────────────
-   BLACKOUT — full-screen black for intro/outro phases
+   BLACKOUT — single full-screen layer above all content
 ───────────────────────────────────────────── */
-body.is-blackout #story-left {
+#blackout-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
   background: #000;
-  border-right-color: #000;
+  z-index: 200;
 }
 
-body.is-blackout #right-bottom {
-  opacity: 0;
+body.is-blackout #blackout-overlay {
+  display: block;
 }
