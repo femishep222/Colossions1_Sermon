@@ -4,6 +4,14 @@
 var BEATS = [
 
   {
+    id: 'beat-0',
+    sectionTitle: '',
+    scripture: null,
+    visual: 'blackScreen',
+    subBeats: []
+  },
+
+  {
     id: 'beat-1',
     sectionTitle: 'Our Norm:  Image  ≠  Reality',
     scripture: null,
@@ -77,13 +85,39 @@ var BEATS = [
     subBeats: [
       {
         id: 'beat-6a',
-        sectionTitle: 'The Cross: Our sin vanquished through his death',
+        sectionTitle: 'The Cross: Son connects with us',
         scripture: [
           { ref: 'Col 1:22', text: '...he has now reconciled in his body of flesh by his death...' },
+        ],
+        visual: 'orbState4aPhase1',
+        subBeats: []
+      },
+      {
+        id: 'beat-6b',
+        sectionTitle: 'The Cross: Blood shed for us',
+        scripture: [
+          { ref: 'Col 1:20', text: '...making peace by the blood of his cross.' },
+          { ref: 'Col 1:22', text: '...he has now reconciled in his body of flesh by his death...' },
+        ],
+        visual: 'orbState4aPhase2',
+        subBeats: []
+      },
+      {
+        id: 'beat-6c',
+        sectionTitle: 'The Cross: Our sin absorbed into him',
+        scripture: [
           { ref: 'Matt 27:46', text: 'My God, my God, why have you forsaken me?' },
+        ],
+        visual: 'orbState4bPhase1',
+        subBeats: []
+      },
+      {
+        id: 'beat-6d',
+        sectionTitle: 'The Cross: Spirit and Father given up to heaven',
+        scripture: [
           { ref: 'Matt 27:50', text: 'And Jesus cried out again with a loud voice and yielded up his spirit.' },
         ],
-        visual: 'orbState4b',
+        visual: 'orbState4bPhase2',
         subBeats: []
       }
     ]
@@ -128,6 +162,14 @@ var BEATS = [
           { ref: 'John 14:2', text: 'In my Father\'s house are many rooms. If it were not so, would I have told you that I go to prepare a place for you?' },
         ],
     visual: 'orbFull',
+    subBeats: []
+  },
+
+  {
+    id: 'beat-end',
+    sectionTitle: '',
+    scripture: null,
+    visual: 'blackScreen',
     subBeats: []
   }
 

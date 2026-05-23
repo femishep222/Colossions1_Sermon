@@ -13,7 +13,7 @@
 html, body {
   height: 100%;
   overflow: hidden;
-  background: #ece4c9;
+  background: #ffffff;
   color: #FFFFFF;
   font-family: 'Inter', system-ui, sans-serif;
 }
@@ -24,37 +24,6 @@ body {
 }
 
 /* ─────────────────────────────────────────────
-   TITLE BAR
-───────────────────────────────────────────── */
-#title-bar {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 1rem;
-  padding: 1rem 2rem 0.8rem;
-  border-bottom: 1px solid #1C1C1C;
-  position: relative;
-  z-index: 20;
-}
-
-#sermon-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-weight: 700;
-  font-size: 2.2rem;
-  letter-spacing: 0.1em;
-  color: #FFFFFF;
-}
-
-#series-ref {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #555555;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-/* ─────────────────────────────────────────────
    MAIN STAGE — two columns
 ───────────────────────────────────────────── */
 #story-stage {
@@ -62,40 +31,35 @@ body {
   display: flex;
   overflow: hidden;
   min-height: 0;
+  position: relative;
 }
 
-/* Left panel — 1/2 */
+/* Left panel — narrower to give visuals more room */
 #story-left {
   flex: 0 0 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 2.5rem 2.5rem 2.5rem 3rem;
+  padding: 2rem 2rem 2rem 2.5rem;
   border-right: 1px solid #1C1C1C;
   position: relative;
   z-index: 20;
 }
 
 #section-title {
-  position: absolute;
-  top: 1.4rem;
-  left: 0;
-  right: 0;
   font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: 1.3rem;
-  letter-spacing: 0.14em;
+  font-weight: 400;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(60, 45, 20, 0.60);
-  text-align: center;
-  z-index: 15;
+  color: #444444;
   pointer-events: none;
 }
 
 #scripture-block {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 3.3rem;
 }
 
 /* Each scripture entry (ref + text) */
@@ -124,8 +88,8 @@ body {
 
 .scripture-ref {
   font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: 0.9rem;
+  font-weight: 600;
+  font-size: clamp(0.85rem, 1.1vw, 1.1rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #7A5C10;
@@ -133,22 +97,22 @@ body {
 }
 
 .scripture-text {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-size: 2.5rem;
-  line-height: 1.5;
-  color: #5C4A32;
-  font-weight: 400;
+  font-family: 'Merriweather', Georgia, serif;
+  font-style: normal;
+  font-size: clamp(1.6rem, 2.6vw, 3.2rem);
+  line-height: 1.55;
+  color: #1a1008;
+  font-weight: 700;
 }
 
-/* Colossians verses — darker and heavier */
+/* Colossians verses — emphasis via gold ref, same dark text */
 .scripture-item.is-col .scripture-ref {
   color: #8B6914;
 }
 
 .scripture-item.is-col .scripture-text {
-  color: #3C2F1E;
-  font-weight: 600;
+  color: #0d0804;
+  font-weight: 900;
 }
 
 /* ─────────────────────────────────────────────
@@ -168,24 +132,56 @@ body {
 }
 
 /* ─────────────────────────────────────────────
-   BOTTOM BAR
+   LEFT PANEL — sermon label pinned to bottom
 ───────────────────────────────────────────── */
-#bottom-bar {
-  flex: 0 0 auto;
-  border-top: 1px solid #1C1C1C;
+#left-bottom {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 2.5rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  padding: 0.55rem 2rem 0.5rem;
-  position: relative;
+  gap: 0.1rem;
+  pointer-events: none;
   z-index: 20;
+}
+
+#sermon-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: #444444;
+}
+
+#series-ref {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: #444444;
+}
+
+/* ─────────────────────────────────────────────
+   RIGHT PANEL — section title (left) + nav (right)
+───────────────────────────────────────────── */
+#right-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0.6rem 1.5rem;
+  z-index: 25;
+  pointer-events: none;
 }
 
 #beat-nav {
   display: flex;
   align-items: center;
   gap: 1.75rem;
+  pointer-events: all;
 }
 
 #beat-nav button {
@@ -217,12 +213,6 @@ body {
   text-align: center;
 }
 
-#attribution {
-  font-size: 0.58rem;
-  color: #333333;
-  letter-spacing: 0.04em;
-}
-
 /* ─────────────────────────────────────────────
    FULL-PAGE CLICK OVERLAY
    Sits above canvas (z 10) but below nav (z 20)
@@ -232,4 +222,15 @@ body {
   inset: 0;
   z-index: 10;
   cursor: pointer;
+}
+
+/* ─────────────────────────────────────────────
+   BLACKOUT — full-screen black on black beats
+───────────────────────────────────────────── */
+body.is-blackout #story-left {
+  background: #000;
+  border-right-color: #000;
+}
+body.is-blackout #left-bottom span {
+  color: #000;
 }

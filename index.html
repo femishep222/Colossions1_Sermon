@@ -6,43 +6,39 @@
   <title>In Relationship — Colossians 1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <!-- Title bar -->
-  <header id="title-bar">
-    <h1 id="sermon-title">Images of IN-dwelling</h1>
-    <span id="series-ref">Colossians 1:15-23</span>
-  </header>
-
   <!-- Two-column stage -->
   <main id="story-stage">
 
-    <!-- Left: scripture -->
+    <!-- Left: scripture + sermon label at bottom -->
     <div id="story-left">
       <div id="scripture-block">
         <!-- scripture items injected by app.js -->
       </div>
+      <div id="left-bottom">
+        <span id="sermon-title">Images of IN-dwelling</span>
+        <span id="series-ref">Colossians 1:15-23</span>
+      </div>
     </div>
 
-    <!-- Right: section title overlay + canvas -->
+    <!-- Right: canvas + section title (bottom-left) + beat nav (bottom-right) -->
     <div id="story-right">
-      <h2 id="section-title"></h2>
       <canvas id="visual-canvas" aria-hidden="true"></canvas>
+      <div id="right-bottom">
+        <h2 id="section-title"></h2>
+        <nav id="beat-nav" aria-label="Sermon navigation">
+          <button id="nav-prev" aria-label="Previous beat" title="Previous (&#8592; &#8593;)">&#8592;</button>
+          <span id="beat-counter" aria-live="polite"></span>
+          <button id="nav-next" aria-label="Next beat" title="Next (&#8594; &#8595; Space)">&#8594;</button>
+        </nav>
+      </div>
     </div>
 
   </main>
-
-  <!-- Bottom bar: beat nav + attribution -->
-  <footer id="bottom-bar">
-    <nav id="beat-nav" aria-label="Sermon navigation">
-      <button id="nav-prev" aria-label="Previous beat" title="Previous (&#8592; &#8593;)">&#8592;</button>
-      <span id="beat-counter" aria-live="polite"></span>
-      <button id="nav-next" aria-label="Next beat" title="Next (&#8594; &#8595; Space)">&#8594;</button>
-    </nav>
-  </footer>
 
   <!-- Full-page click overlay — sits above canvas, below nav -->
   <div id="story-overlay" role="button" tabindex="0" aria-label="Advance"></div>

@@ -83,6 +83,7 @@
     idx = i;
     var beat = FLAT[i];
 
+    document.body.classList.toggle('is-blackout', beat.visual === 'blackScreen');
     renderLeft(beat);
     renderVisual(beat);
     updateNav(i);

@@ -9,19 +9,20 @@
   var GOLD      = '#F5C518';
   var GOLD_DK   = '#A0690A';
   var PEARL     = '#EEF2FF';
+  var SPIRIT_RED = '#ffd5d5';
   var TEAL      = '#0D9488';
   var TEAL_LT   = '#14B8A6';
   var SIN       = '#3A3A3A';
-  var BLOOD     = '#B22222';
+  var BLOOD     = '#750b0b';
   var LINE_COL  = '#888888';
-  var PASTELS   = ['#E8C4B8', '#F0D5B0', '#D4B896', '#C4D4B8', '#C8C0D8'];
+  var PASTELS   = ['#47270a', '#986215', '#D4B896', '#d57827', '#d89b2a'];
 
   /* ─────────────────────────────────────────────
      DRAW HELPERS
   ───────────────────────────────────────────── */
 
-  /* Pre-incarnation Trinity orb: Gold outer ring, Pearl fill, Teal centre */
-  function drawOrb(ctx, cx, cy, r) {
+  /* Father ring + Spirit band only — no Son centre */
+  function drawOrbRings(ctx, cx, cy, r) {
     ctx.save();
 
     ctx.shadowBlur  = r * 0.65;
@@ -38,12 +39,18 @@
     ctx.shadowBlur = 0;
     ctx.beginPath();
     ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
-    ctx.fillStyle = PEARL;
+    ctx.fillStyle = SPIRIT_RED;
     ctx.fill();
 
+    ctx.restore();
+  }
+
+  /* Son teal centre only */
+  function drawOrbSon(ctx, cx, cy, r) {
+    ctx.save();
     ctx.shadowBlur  = r * 0.35;
     ctx.shadowColor = TEAL;
-    var tCR  = CONFIG.CENTRE_RATIO;
+    var tCR   = CONFIG.CENTRE_RATIO;
     var tGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * tCR);
     tGrad.addColorStop(0, TEAL_LT);
     tGrad.addColorStop(1, TEAL);
@@ -51,8 +58,13 @@
     ctx.arc(cx, cy, r * tCR, 0, Math.PI * 2);
     ctx.fillStyle = tGrad;
     ctx.fill();
-
     ctx.restore();
+  }
+
+  /* Pre-incarnation Trinity orb: Gold outer ring, Spirit band, Son teal centre */
+  function drawOrb(ctx, cx, cy, r) {
+    drawOrbRings(ctx, cx, cy, r);
+    drawOrbSon(ctx, cx, cy, r);
   }
 
   /* Gold centre dot — used inside Christ's body circle at the chest */
@@ -140,13 +152,13 @@
 
   /* Christ: teal outline, pearl body, teal head, gold chest dot */
   function drawChrist(ctx, cx, cy, size) {
-    drawHuman(ctx, cx, cy, size, TEAL, PEARL, TEAL);
+    drawHuman(ctx, cx, cy, size, TEAL, SPIRIT_RED, TEAL);
     drawGoldCentre(ctx, cx, chestY(cy, size), size * 0.25 * CONFIG.CENTRE_RATIO);
   }
 
   /* Church member: pastel outer ring, pearl body, pastel head, gold chest dot */
   function drawChurchFig(ctx, cx, cy, size, pastelCol) {
-    drawHuman(ctx, cx, cy, size, pastelCol, PEARL, pastelCol);
+    drawHuman(ctx, cx, cy, size, pastelCol, SPIRIT_RED, pastelCol);
     drawGoldCentre(ctx, cx, chestY(cy, size), size * 0.25 * CONFIG.CENTRE_RATIO);
   }
 
@@ -204,9 +216,9 @@
   function drawSpiritOrb(ctx, cx, cy, r) {
     ctx.save();
     ctx.shadowBlur  = r * 1.6;
-    ctx.shadowColor = PEARL;
+    ctx.shadowColor = SPIRIT_RED;
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fillStyle = PEARL;
+    ctx.fillStyle = SPIRIT_RED;
     ctx.fill();
     ctx.shadowBlur  = r * 0.4;
     ctx.shadowColor = GOLD;
@@ -226,17 +238,17 @@
     var full    = (elapsed % CONFIG.SPIRIT_PULSE_MS) / CONFIG.SPIRIT_PULSE_MS;
     /* cosine oscillation: starts at outer (p=1), moves inward to (p=0), returns to outer */
     var p       = 0.5 + 0.5 * Math.cos(full * Math.PI * 2);
-    var hw      = 0.20;  /* wave half-width as fraction of band */
+    var hw      = 0.38;  /* wave half-width as fraction of band */
 
     var grad = ctx.createRadialGradient(cx, cy, centreR, cx, cy, innerR);
     var pC   = Math.min(Math.max(p, 0.001), 0.999);
     var s0   = Math.max(0, p - hw);
     var s1   = Math.min(1, p + hw);
-    grad.addColorStop(0,    'rgba(220, 110, 130, 0)');
-    if (s0 > 0.002)  grad.addColorStop(s0,  'rgba(220, 110, 130, 0)');
-    grad.addColorStop(pC,   'rgba(220, 110, 130, 0.28)');
-    if (s1 < 0.998)  grad.addColorStop(s1,  'rgba(220, 110, 130, 0)');
-    grad.addColorStop(1,    'rgba(220, 110, 130, 0)');
+    grad.addColorStop(0,    'rgba(255, 255, 255, 0)');
+    if (s0 > 0.002)  grad.addColorStop(s0,  'rgba(255, 255, 255, 0)');
+    grad.addColorStop(pC,   'rgba(163, 0, 0, 0.15)');
+    if (s1 < 0.998)  grad.addColorStop(s1,  'rgba(255, 255, 255, 0)');
+    grad.addColorStop(1,    'rgba(255, 255, 255, 0)');
 
     ctx.save();
     ctx.beginPath();
@@ -249,6 +261,7 @@
 
   /* Very faint teal compass rays — used as lingering background in States 3+ */
   function drawFaintRays(ctx, cx, cy, w, h, alpha, colour, lw) {
+    return; /* hidden — centre coordinates still passed by callers for layout reference */
     var maxLen = Math.sqrt(w * w + h * h);
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -270,7 +283,7 @@
     var innerR  = r * (1 - CONFIG.BAND_RATIO);
     var centreR = r * CONFIG.CENTRE_RATIO;
     var fs      = Math.round(bandW * 0.35);
-    var COL     = { 'FATHER': PEARL, 'SPIRIT': TEAL, 'SON': '#FFFFFF' };
+    var COL     = { 'FATHER': PEARL, 'SPIRIT': '#FFFFFF', 'SON': '#FFFFFF' };
 
     ctx.save();
     ctx.font          = '600 ' + fs + 'px Inter, sans-serif';
@@ -331,6 +344,12 @@
   ───────────────────────────────────────────── */
 
   window.VISUALS = {};
+
+  /* ── Plain black screen — used for opening and closing beats ── */
+  window.VISUALS.blackScreen = function (ctx, w, h) {
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, w, h);
+  };
 
   /* ── Image helper: contain-scale an image in the canvas area below the title overlay ── */
   function drawImageContain(ctx, img, w, h) {
@@ -480,7 +499,7 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      drawOrb(ctx, cx, cy, r);
+      drawOrbRings(ctx, cx, cy, r);
       drawSpiritPulse(ctx, cx, cy, r, ts - t0);
 
       var tipHW = Math.min(w, h) * CONFIG.RAY_TIP_WIDTH;
@@ -505,8 +524,8 @@
 
         /* "WORD" text tracking outward along the ray midpoint */
         if (len > r * 1.5) {
-          var midX     = cx + ray.dx * len * 0.40;
-          var midY     = cy + ray.dy * len * 0.40;
+          var midX     = cx + ray.dx * len * 0.55;
+          var midY     = cy + ray.dy * len * 0.55;
           var angle    = Math.atan2(ray.dy, ray.dx);
           if (Math.cos(angle) < 0) angle += Math.PI;  /* flip rays pointing leftward so text reads right-way up */
           var fontSize = Math.min(w, h) * 0.022;
@@ -533,7 +552,10 @@
         }
       });
 
-      /* Trinity labels — on top of orb and rays */
+      /* Son centre drawn after rays so it sits in front of them */
+      drawOrbSon(ctx, cx, cy, r);
+
+      /* Trinity labels — on top of everything */
       ctx.save();
       ctx.globalAlpha = p;
       drawOrbLabels(ctx, cx, cy, r, ['FATHER', 'SPIRIT', 'SON']);
@@ -666,7 +688,246 @@
     return function () { running = false; };
   };
 
-  /* ── Beat 6: State 4b — sin-orbs rise to Christ, Christ darkens, Spirit rises ── */
+  /* ── Beat 6a: State 4b static — cross + lines + figures with sin orbs at chest ── */
+  window.VISUALS.orbState4bStatic = function (ctx, w, h) {
+    var cp    = christXY(w, h);
+    var figs  = figPositions(w, h);
+    var fSz   = Math.min(w, h) * CONFIG.FIGURE_SIZE;
+    var cSz   = Math.min(w, h) * CONFIG.CHRIST_SIZE;
+    var sinR  = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
+    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
+    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
+    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
+
+    ctx.clearRect(0, 0, w, h);
+    drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
+
+    ctx.save();
+    ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
+    figs.forEach(function (f) {
+      ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
+    });
+    ctx.restore();
+
+    figs.forEach(function (f, i) {
+      drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
+      drawSinOrb(ctx, f.x, chestY(f.y, fSz), sinR);
+    });
+
+    ctx.save();
+    ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
+    drawChrist(ctx, cp.x, cp.y, cSz);
+    ctx.restore();
+  };
+
+  /* ── Beat 7a: Son establishes connection with 5 bodies ── */
+  window.VISUALS.orbState4aPhase1 = function (ctx, w, h) {
+    var cp      = christXY(w, h);
+    var figs    = figPositions(w, h);
+    var fSz     = Math.min(w, h) * CONFIG.FIGURE_SIZE;
+    var cSz     = Math.min(w, h) * CONFIG.CHRIST_SIZE;
+    var sinR    = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
+    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
+    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
+    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
+    var CD      = CONFIG.CROSS_DURATION;
+    var FD      = 800;
+    var running = true, t0 = null;
+
+    function frame(ts) {
+      if (!running) return;
+      if (!t0) t0 = ts;
+      var elapsed = ts - t0;
+      var xP = easeOut(Math.min(elapsed / CD, 1));
+      var fP = easeOut(Math.min(Math.max(elapsed - CD, 0) / FD, 1));
+
+      ctx.clearRect(0, 0, w, h);
+      drawCross(ctx, cp.x, cp.y, crossW * xP, crossH * xP, CONFIG.CROSS_LINE_ALPHA, crossLW);
+
+      ctx.save();
+      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35 * fP;
+      figs.forEach(function (f) {
+        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
+      });
+      ctx.restore();
+
+      ctx.save(); ctx.globalAlpha = fP;
+      figs.forEach(function (f, i) {
+        drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
+        drawSinOrb(ctx, f.x, chestY(f.y, fSz), sinR);
+      });
+      ctx.restore();
+
+      ctx.save(); ctx.globalAlpha = xP;
+      ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
+      drawChrist(ctx, cp.x, cp.y, cSz);
+      ctx.restore();
+
+      if (xP < 1 || fP < 1) requestAnimationFrame(frame);
+      else running = false;
+    }
+    requestAnimationFrame(frame);
+    return function () { running = false; };
+  };
+
+  /* ── Beat 7b: Son sheds blood drops into 5 people ── */
+  window.VISUALS.orbState4aPhase2 = function (ctx, w, h) {
+    var cp      = christXY(w, h);
+    var figs    = figPositions(w, h);
+    var fSz     = Math.min(w, h) * CONFIG.FIGURE_SIZE;
+    var cSz     = Math.min(w, h) * CONFIG.CHRIST_SIZE;
+    var sinR    = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
+    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
+    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
+    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
+    var BD      = CONFIG.BLOOD_DURATION;
+    var running = true, t0 = null;
+
+    function drawSettled() {
+      drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
+      ctx.save();
+      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
+      figs.forEach(function (f) {
+        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
+      });
+      ctx.restore();
+      figs.forEach(function (f, i) {
+        drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
+        drawSinOrb(ctx, f.x, chestY(f.y, fSz), sinR);
+      });
+      ctx.save();
+      ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
+      drawChrist(ctx, cp.x, cp.y, cSz);
+      ctx.restore();
+    }
+
+    function frame(ts) {
+      if (!running) return;
+      if (!t0) t0 = ts;
+      var bP = easeOut(Math.min((ts - t0) / BD, 1));
+
+      ctx.clearRect(0, 0, w, h);
+      drawSettled();
+
+      ctx.save();
+      ctx.fillStyle   = BLOOD;
+      ctx.globalAlpha = Math.sin(bP * Math.PI);
+      figs.forEach(function (f) {
+        var bx = cp.x + (f.x - cp.x) * bP;
+        var by = cp.y + (f.y - cp.y) * bP;
+        ctx.beginPath(); ctx.arc(bx, by, sinR, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.restore();
+
+      if (bP < 1) requestAnimationFrame(frame);
+      else running = false;
+    }
+    requestAnimationFrame(frame);
+    return function () { running = false; };
+  };
+
+  /* ── Beat 7c: Son absorbs black sin drops from 5 people ── */
+  window.VISUALS.orbState4bPhase1 = function (ctx, w, h) {
+    var cp      = christXY(w, h);
+    var figs    = figPositions(w, h);
+    var fSz     = Math.min(w, h) * CONFIG.FIGURE_SIZE;
+    var cSz     = Math.min(w, h) * CONFIG.CHRIST_SIZE;
+    var sinR    = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
+    var cOrbR   = cSz * 0.25 * CONFIG.CENTRE_RATIO;
+    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
+    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
+    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
+    var TRAVEL  = CONFIG.SIN_ORB_TRAVEL;
+    var running = true, t0 = null;
+
+    function frame(ts) {
+      if (!running) return;
+      if (!t0) t0 = ts;
+      var tP = easeOut(Math.min((ts - t0) / TRAVEL, 1));
+
+      ctx.clearRect(0, 0, w, h);
+      drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
+
+      ctx.save();
+      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
+      figs.forEach(function (f) {
+        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
+      });
+      ctx.restore();
+
+      figs.forEach(function (f, i) {
+        drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
+        var cy2 = chestY(f.y, fSz);
+        var bx  = f.x  + (cp.x - f.x)  * tP;
+        var by  = cy2  + (cp.y  - cy2)  * tP;
+        if (tP < 1) drawSinOrb(ctx, bx, by, sinR * (1 - tP * 0.4));
+      });
+
+      drawHuman(ctx, cp.x, cp.y, cSz, TEAL, SPIRIT_RED, TEAL);
+      drawGoldCentre(ctx, cp.x, chestY(cp.y, cSz), cOrbR);
+
+      if (tP < 1) requestAnimationFrame(frame);
+      else running = false;
+    }
+    requestAnimationFrame(frame);
+    return function () { running = false; };
+  };
+
+  /* ── Beat 7d: Son gives up Spirit and Father-orb to heaven ── */
+  window.VISUALS.orbState4bPhase2 = function (ctx, w, h) {
+    var cp      = christXY(w, h);
+    var figs    = figPositions(w, h);
+    var fSz     = Math.min(w, h) * CONFIG.FIGURE_SIZE;
+    var cSz     = Math.min(w, h) * CONFIG.CHRIST_SIZE;
+    var cOrbR   = cSz * 0.25 * CONFIG.CENTRE_RATIO;
+    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
+    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
+    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
+    var SPIRIT  = CONFIG.SPIRIT_RISE;
+    var running = true, t0 = null;
+    var spiritR = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
+
+    function frame(ts) {
+      if (!running) return;
+      if (!t0) t0 = ts;
+      var sP = easeOut(Math.min((ts - t0) / SPIRIT, 1));
+
+      ctx.clearRect(0, 0, w, h);
+      drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
+
+      ctx.save();
+      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
+      figs.forEach(function (f) {
+        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
+      });
+      ctx.restore();
+
+      figs.forEach(function (f, i) { drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]); });
+
+      /* Christ: normal body darkening as sin is fully absorbed */
+      drawHuman(ctx, cp.x, cp.y, cSz, TEAL, SPIRIT_RED, TEAL);
+      ctx.save(); ctx.globalAlpha = sP;
+      drawHuman(ctx, cp.x, cp.y, cSz, TEAL, '#0D0D0D', '#0D0D0D');
+      ctx.restore();
+
+      /* Father orb (gold centre) rises from chest and fades */
+      var fatherY = chestY(cp.y, cSz) - sP * h * 0.18;
+      ctx.save(); ctx.globalAlpha = 1 - sP;
+      drawGoldCentre(ctx, cp.x, fatherY, cOrbR);
+      ctx.restore();
+
+      /* Spirit orb rises from Christ body */
+      var spiritY = cp.y - sP * h * 0.22;
+      drawSpiritOrb(ctx, cp.x, spiritY, spiritR);
+
+      if (sP < 1) requestAnimationFrame(frame);
+      else running = false;
+    }
+    requestAnimationFrame(frame);
+    return function () { running = false; };
+  };
+
+  /* ── Beat 6b: State 4b — sin-orbs rise to Christ, Christ darkens, Spirit rises ── */
   window.VISUALS.orbState4b = function (ctx, w, h) {
     var cp      = christXY(w, h);
     var figs    = figPositions(w, h);
@@ -712,7 +973,7 @@
       });
 
       /* Christ: body drawn first so pearl fill doesn't cover the gold dot */
-      drawHuman(ctx, cp.x, cp.y, cSz, TEAL, PEARL, TEAL);
+      drawHuman(ctx, cp.x, cp.y, cSz, TEAL, SPIRIT_RED, TEAL);
       if (sP > 0) {
         ctx.save();
         ctx.globalAlpha = sP;
@@ -785,7 +1046,7 @@
       /* Figures */
       figs.forEach(function (f, i) {
         var hP    = Math.min(Math.max((flP - i * 0.10) / 0.60, 0), 1);
-        var bFill = hP >= 1 ? PEARL : SIN;
+        var bFill = hP >= 1 ? SPIRIT_RED : SIN;
         var cy2   = chestY(f.y, fSz);
         drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], bFill, PASTELS[i]);
 
@@ -795,7 +1056,7 @@
           var ty = cp.y + (f.y - cp.y) * hP;
           ctx.save(); ctx.globalAlpha = 0.9;
           ctx.beginPath(); ctx.arc(tx, ty, dotPearlR, 0, Math.PI * 2);
-          ctx.fillStyle = PEARL; ctx.fill();
+          ctx.fillStyle = SPIRIT_RED; ctx.fill();
           drawGoldCentre(ctx, tx, ty, dotR);
           ctx.restore();
         } else if (hP >= 1) {
@@ -804,7 +1065,7 @@
       });
 
       /* Christ — starts fully dark, body + head restore as Spirit arrives */
-      drawHuman(ctx, cp.x, cp.y, cSz, TEAL, PEARL, TEAL);
+      drawHuman(ctx, cp.x, cp.y, cSz, TEAL, SPIRIT_RED, TEAL);
       if (reP < 1) {
         ctx.save();
         ctx.globalAlpha = 1 - reP;
@@ -1124,7 +1385,7 @@
       ctx.shadowBlur = 0;
       ctx.beginPath();
       ctx.arc(orbCx, orbCy, innerR, 0, Math.PI * 2);
-      ctx.fillStyle = PEARL;
+      ctx.fillStyle = SPIRIT_RED;
       ctx.fill();
       ctx.restore();
 
@@ -1152,7 +1413,7 @@
       ctx.letterSpacing  = '0.10em';
       ctx.fillStyle      = PEARL;
       ctx.fillText('FATHER', orbCx, orbCy - (r + innerR) / 2);
-      ctx.fillStyle      = TEAL;
+      ctx.fillStyle      = '#FFFFFF';
       ctx.fillText('SPIRIT', orbCx, orbCy + (innerR + centreR) / 2);
       ctx.fillStyle      = '#FFFFFF';
       ctx.fillText('SONS', orbCx, orbCy);

@@ -25,26 +25,26 @@ var CONFIG = {
   /* ── Orb & ring proportions ────────────────────────────────────────────── */
   BAND_RATIO:            0.33,   /* outer ring width / outer radius (gold orb + figure bodies) */
   CENTRE_RATIO:          0.33,   /* inner circle radius / outer radius (teal in orb, gold in figures) */
-  LARGE_ORB_SCALE:       0.22,   /* orb radius = min(w,h) × this (beats 3–9) */
-  ORB_CENTRE_Y:          0.59,   /* orb vertical centre as fraction of h (beats 3–9) */
+  LARGE_ORB_SCALE:       0.29,   /* orb radius = min(w,h) × this (beats 3–9) */
+  ORB_CENTRE_Y:          0.50,   /* orb vertical centre as fraction of h (beats 3–9) */
 
   /* ── Figure & scene layout ─────────────────────────────────────────────── */
-  IMAGE_TOP_PAD:         0.10,   /* top padding for image beats (beats 1–2)  */
+  IMAGE_TOP_PAD:         0.04,   /* top padding for image beats (beats 1–2)  */
   SIN_ORB_RATIO:         0.52,   /* sin-orb radius / body radius (beats 6–6a) */
   CROSS_LINE_ALPHA:      0.65,   /* cross opacity (beats 6–7)                */
   CROSS_LINE_SCALE:      0.0175, /* cross line width as fraction of min(w,h) */
   CROSS_H_RATIO:         0.50,   /* cross vertical arm / Christ-figure size  */
   CROSS_W_RATIO:         0.38,   /* cross horizontal arm / Christ-figure size */
   RAY_TIP_WIDTH:         0.07,   /* ray tip half-width as fraction of min(w,h) */
-  CHRIST_Y:              0.30,   /* Christ figure Y as fraction of h         */
-  CHRIST_SIZE:           0.14,   /* Christ figure size as fraction of min(w,h) */
-  FIGURES_Y:             0.68,   /* figure row Y as fraction of h            */
+  CHRIST_Y:              0.28,   /* Christ figure Y as fraction of h         */
+  CHRIST_SIZE:           0.17,   /* Christ figure size as fraction of min(w,h) */
+  FIGURES_Y:             0.72,   /* figure row Y as fraction of h            */
   FIGURES_GAP:           0.13,   /* gap between figures as fraction of w     */
-  FIGURE_SIZE:           0.11,   /* church figure size as fraction of min(w,h) */
+  FIGURE_SIZE:           0.13,   /* church figure size as fraction of min(w,h) */
   FIGURE_STAGGER:        0.12,   /* animation stagger between figures        */
-  HEAD_GAP_RATIO:        0.07,   /* head–body gap as fraction of body radius */
+  HEAD_GAP_RATIO:        -0.03,   /* head–body gap as fraction of body radius */
   HEART_CHEST_RATIO:     0.56,   /* (legacy) heart radius / body radius      */
-  ASSEMBLE_SCALE:        0.22,   /* assembled body radius = min(w,h) × this  */
+  ASSEMBLE_SCALE:        0.29,   /* assembled body radius = min(w,h) × this  */
   ASSEMBLE_Y:            0.50,   /* assembled body centre Y as fraction of h */
 
 };
