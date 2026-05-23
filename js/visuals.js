@@ -618,15 +618,12 @@
   window.VISUALS.orbState4a = function (ctx, w, h) {
     var cp    = christXY(w, h);
     var figs  = figPositions(w, h);
+    cp.y = h * CONFIG.FIGURES_Y;
+    figs.forEach(function (f) { f.y = h * 0.46; });
     var fSz   = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz   = Math.min(w, h) * CONFIG.CHRIST_SIZE;
     var sinR  = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
-    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
-    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
-    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
-    var CD = CONFIG.CROSS_DURATION;   /* phase 1 end */
-    var BD = CONFIG.BLOOD_DURATION;   /* phase 2 duration */
-    var FD = 800;                     /* phase 3 duration */
+    var FD = 800;
     var running = true, t0 = null;
 
     function frame(ts) {
@@ -634,15 +631,10 @@
       if (!t0) t0 = ts;
       var elapsed = ts - t0;
 
-      /* Phase progress — each clamped [0,1] */
-      var xP = easeOut(Math.min(elapsed / CD,                        1));  /* cross */
-      var fP = easeOut(Math.min(Math.max(elapsed - CD,      0) / FD, 1));  /* figures */
-      var bP = easeOut(Math.min(Math.max(elapsed - CD - FD, 0) / BD, 1));  /* blood — last */
+      var cP = easeOut(Math.min(elapsed / 400, 1));          /* Christ fades in */
+      var fP = easeOut(Math.min(Math.max(elapsed - 400, 0) / FD, 1));  /* figures */
 
       ctx.clearRect(0, 0, w, h);
-
-      /* Cross — fully grown once phase 1 ends */
-      drawCross(ctx, cp.x, cp.y, crossW * xP, crossH * xP, CONFIG.CROSS_LINE_ALPHA, crossLW);
 
       /* Connection lines — fade in with figures */
       ctx.save();
@@ -652,7 +644,7 @@
       });
       ctx.restore();
 
-      /* Figures + sin orbs — phase 2 */
+      /* Figures + sin orbs */
       ctx.save(); ctx.globalAlpha = fP;
       figs.forEach(function (f, i) {
         drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
@@ -660,28 +652,13 @@
       });
       ctx.restore();
 
-      /* Christ — fades in with the cross */
-      ctx.save(); ctx.globalAlpha = xP;
+      /* Christ */
+      ctx.save(); ctx.globalAlpha = cP;
       ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
       drawChrist(ctx, cp.x, cp.y, cSz);
       ctx.restore();
 
-      /* Blood drops — travel outward from Christ, fade in then dissolve on arrival */
-      if (bP > 0) {
-        ctx.save();
-        ctx.fillStyle   = BLOOD;
-        ctx.globalAlpha = Math.sin(bP * Math.PI);
-        figs.forEach(function (f) {
-          var bx = cp.x + (f.x - cp.x) * bP;
-          var by = cp.y + (f.y - cp.y) * bP;
-          ctx.beginPath();
-          ctx.arc(bx, by, sinR, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        ctx.restore();
-      }
-
-      if (xP < 1 || fP < 1 || bP < 1) requestAnimationFrame(frame);
+      if (cP < 1 || fP < 1) requestAnimationFrame(frame);
       else running = false;
     }
     requestAnimationFrame(frame);
@@ -720,10 +697,12 @@
     ctx.restore();
   };
 
-  /* ── Beat 7a: Son establishes connection with 5 bodies ── */
+  /* ── Beat 7a: Cross grows in; Christ and 5 people present from the start ── */
   window.VISUALS.orbState4aPhase1 = function (ctx, w, h) {
     var cp      = christXY(w, h);
     var figs    = figPositions(w, h);
+    cp.y = h * CONFIG.FIGURES_Y;
+    figs.forEach(function (f) { f.y = h * 0.46; });
     var fSz     = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz     = Math.min(w, h) * CONFIG.CHRIST_SIZE;
     var sinR    = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
@@ -731,39 +710,39 @@
     var crossH  = cSz * CONFIG.CROSS_H_RATIO;
     var crossW  = cSz * CONFIG.CROSS_W_RATIO;
     var CD      = CONFIG.CROSS_DURATION;
-    var FD      = 800;
     var running = true, t0 = null;
 
     function frame(ts) {
       if (!running) return;
       if (!t0) t0 = ts;
-      var elapsed = ts - t0;
-      var xP = easeOut(Math.min(elapsed / CD, 1));
-      var fP = easeOut(Math.min(Math.max(elapsed - CD, 0) / FD, 1));
+      var xP = easeOut(Math.min((ts - t0) / CD, 1));
 
       ctx.clearRect(0, 0, w, h);
+
+      /* Cross grows in */
       drawCross(ctx, cp.x, cp.y, crossW * xP, crossH * xP, CONFIG.CROSS_LINE_ALPHA, crossLW);
 
+      /* Connection lines — present from the start */
       ctx.save();
-      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35 * fP;
+      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
       figs.forEach(function (f) {
         ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
       });
       ctx.restore();
 
-      ctx.save(); ctx.globalAlpha = fP;
+      /* Figures — present from the start */
       figs.forEach(function (f, i) {
         drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
         drawSinOrb(ctx, f.x, chestY(f.y, fSz), sinR);
       });
-      ctx.restore();
 
-      ctx.save(); ctx.globalAlpha = xP;
+      /* Christ — present from the start */
+      ctx.save();
       ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
       drawChrist(ctx, cp.x, cp.y, cSz);
       ctx.restore();
 
-      if (xP < 1 || fP < 1) requestAnimationFrame(frame);
+      if (xP < 1) requestAnimationFrame(frame);
       else running = false;
     }
     requestAnimationFrame(frame);
@@ -774,6 +753,8 @@
   window.VISUALS.orbState4aPhase2 = function (ctx, w, h) {
     var cp      = christXY(w, h);
     var figs    = figPositions(w, h);
+    cp.y = h * CONFIG.FIGURES_Y;
+    figs.forEach(function (f) { f.y = h * 0.46; });
     var fSz     = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz     = Math.min(w, h) * CONFIG.CHRIST_SIZE;
     var sinR    = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
@@ -826,10 +807,12 @@
     return function () { running = false; };
   };
 
-  /* ── Beat 7c: Son absorbs black sin drops from 5 people ── */
+  /* ── Beat 7c: Blood ascends to 5 people, then sin descends to Christ 1s later ── */
   window.VISUALS.orbState4bPhase1 = function (ctx, w, h) {
     var cp      = christXY(w, h);
     var figs    = figPositions(w, h);
+    cp.y = h * CONFIG.FIGURES_Y;
+    figs.forEach(function (f) { f.y = h * 0.46; });
     var fSz     = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz     = Math.min(w, h) * CONFIG.CHRIST_SIZE;
     var sinR    = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
@@ -837,13 +820,18 @@
     var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
     var crossH  = cSz * CONFIG.CROSS_H_RATIO;
     var crossW  = cSz * CONFIG.CROSS_W_RATIO;
-    var TRAVEL  = CONFIG.SIN_ORB_TRAVEL;
+    var BD           = CONFIG.BLOOD_DURATION;
+    var T_SIN_START  = 1000;
+    var T_END        = T_SIN_START + CONFIG.SIN_ORB_TRAVEL;
     var running = true, t0 = null;
 
     function frame(ts) {
       if (!running) return;
       if (!t0) t0 = ts;
-      var tP = easeOut(Math.min((ts - t0) / TRAVEL, 1));
+      var el = ts - t0;
+
+      var bP = easeOut(Math.min(el / BD, 1));
+      var tP = easeOut(Math.min(Math.max((el - T_SIN_START) / CONFIG.SIN_ORB_TRAVEL, 0), 1));
 
       ctx.clearRect(0, 0, w, h);
       drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
@@ -855,18 +843,47 @@
       });
       ctx.restore();
 
+      /* Figures — inner body fades from SIN to PEARL as sin departs */
       figs.forEach(function (f, i) {
+        drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], PEARL, PASTELS[i]);
+        ctx.save(); ctx.globalAlpha = 1 - tP;
         drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
+        ctx.restore();
+        /* Sin orb travels from chest to Christ */
         var cy2 = chestY(f.y, fSz);
-        var bx  = f.x  + (cp.x - f.x)  * tP;
-        var by  = cy2  + (cp.y  - cy2)  * tP;
-        if (tP < 1) drawSinOrb(ctx, bx, by, sinR * (1 - tP * 0.4));
+        var sx  = f.x + (cp.x - f.x) * tP;
+        var sy  = cy2 + (cp.y - cy2)  * tP;
+        if (tP < 1) drawSinOrb(ctx, sx, sy, sinR * (1 - tP * 0.4));
       });
 
+      /* Blood drops ascend from Christ to each figure */
+      if (bP > 0 && bP < 1) {
+        ctx.save();
+        ctx.fillStyle   = BLOOD;
+        ctx.globalAlpha = Math.sin(bP * Math.PI);
+        figs.forEach(function (f) {
+          var bx = cp.x + (f.x - cp.x) * bP;
+          var by = cp.y + (f.y - cp.y) * bP;
+          ctx.beginPath(); ctx.arc(bx, by, sinR, 0, Math.PI * 2); ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      /* Christ — base figure + dark sin overlay growing over inner area only */
       drawHuman(ctx, cp.x, cp.y, cSz, TEAL, SPIRIT_RED, TEAL);
+      if (tP > 0) {
+        var cBodyCy = chestY(cp.y, cSz);
+        var innerR  = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
+        ctx.save();
+        ctx.globalAlpha = tP * 0.65;
+        ctx.fillStyle = SIN;
+        ctx.beginPath(); ctx.arc(cp.x, cBodyCy, innerR, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+      /* Gold Father centre drawn last so it stays visible above dark overlay */
       drawGoldCentre(ctx, cp.x, chestY(cp.y, cSz), cOrbR);
 
-      if (tP < 1) requestAnimationFrame(frame);
+      if (el < T_END) requestAnimationFrame(frame);
       else running = false;
     }
     requestAnimationFrame(frame);
@@ -877,15 +894,17 @@
   window.VISUALS.orbState4bPhase2 = function (ctx, w, h) {
     var cp      = christXY(w, h);
     var figs    = figPositions(w, h);
+    cp.y = h * CONFIG.FIGURES_Y;
+    figs.forEach(function (f) { f.y = h * 0.46; });
     var fSz     = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz     = Math.min(w, h) * CONFIG.CHRIST_SIZE;
-    var cOrbR   = cSz * 0.25 * CONFIG.CENTRE_RATIO;
     var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
     var crossH  = cSz * CONFIG.CROSS_H_RATIO;
     var crossW  = cSz * CONFIG.CROSS_W_RATIO;
     var SPIRIT  = CONFIG.SPIRIT_RISE;
     var running = true, t0 = null;
-    var spiritR = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
+    var spiritR      = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
+    var spiritTravel = cp.y - h * 0.06;
 
     function frame(ts) {
       if (!running) return;
@@ -902,7 +921,7 @@
       });
       ctx.restore();
 
-      figs.forEach(function (f, i) { drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]); });
+      figs.forEach(function (f, i) { drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], PEARL, PASTELS[i]); });
 
       /* Christ: normal body darkening as sin is fully absorbed */
       drawHuman(ctx, cp.x, cp.y, cSz, TEAL, SPIRIT_RED, TEAL);
@@ -910,14 +929,8 @@
       drawHuman(ctx, cp.x, cp.y, cSz, TEAL, '#0D0D0D', '#0D0D0D');
       ctx.restore();
 
-      /* Father orb (gold centre) rises from chest and fades */
-      var fatherY = chestY(cp.y, cSz) - sP * h * 0.18;
-      ctx.save(); ctx.globalAlpha = 1 - sP;
-      drawGoldCentre(ctx, cp.x, fatherY, cOrbR);
-      ctx.restore();
-
-      /* Spirit orb rises from Christ body */
-      var spiritY = cp.y - sP * h * 0.22;
+      /* Spirit orb (with Father gold centre inside) rises from Christ body */
+      var spiritY = cp.y - sP * spiritTravel;
       drawSpiritOrb(ctx, cp.x, spiritY, spiritR);
 
       if (sP < 1) requestAnimationFrame(frame);
@@ -1001,43 +1014,53 @@
 
   /* ── Beat 7: State 5 — Spirit descends, Christ restores, gold dots flow to figures ── */
   window.VISUALS.orbState5 = function (ctx, w, h) {
-    var cp       = christXY(w, h);
+    /* Christ starts at bottom (stooping), then ascends to his natural height */
+    var cpStart  = { x: w * 0.5, y: h * CONFIG.FIGURES_Y };
+    var cpEnd    = { x: w * 0.5, y: h * CONFIG.CHRIST_Y };
     var figs     = figPositions(w, h);
+    figs.forEach(function (f) { f.y = h * 0.46; });
+
     var fSz      = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz      = Math.min(w, h) * CONFIG.CHRIST_SIZE;
-    var cOrbR      = cSz * 0.25 * CONFIG.CENTRE_RATIO;
-    var dotR       = fSz * 0.25 * CONFIG.CENTRE_RATIO;
-    var dotPearlR  = fSz * 0.25 * (1 - CONFIG.BAND_RATIO);
+    var cOrbR    = cSz * 0.25 * CONFIG.CENTRE_RATIO;
+    var dotR     = fSz * 0.25 * CONFIG.CENTRE_RATIO;
+    var dotPearlR = fSz * 0.25 * (1 - CONFIG.BAND_RATIO);
+
+    /* Spirit descends from where beat-7d left it (near top) all the way to Christ at bottom */
+    var spiritStartY = h * 0.06;
+    var spiritR      = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
 
     /* Phase timing (ms) */
-    var T_SPIRIT  = 900;            /* spirit descends         */
-    var T_RESTORE = T_SPIRIT + 600; /* Christ restores         */
-    var T_FLOW    = T_RESTORE + 200;/* gold dots begin flowing */
-    var T_END     = T_FLOW + CONFIG.SPIRIT_FLOW;
-    var running   = true, t0 = null;
-
-    /* Spirit starts at its risen position from State 4b */
-    var spiritStartY = cp.y - h * 0.22;
-    var spiritR      = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
+    var T_SPIRIT     = 2500;                    /* spirit descends full distance    */
+    var T_RESTORE    = T_SPIRIT + 500;          /* Christ colour restores           */
+    var T_ASCEND     = T_RESTORE + 100;         /* Christ begins rising             */
+    var T_ASCEND_END = T_ASCEND + 1600;         /* Christ reaches natural height    */
+    var T_FLOW       = T_ASCEND_END + 300;      /* gold dots begin flowing outward  */
+    var T_END        = T_FLOW + CONFIG.SPIRIT_FLOW;
+    var running      = true, t0 = null;
 
     function frame(ts) {
       if (!running) return;
       if (!t0) t0 = ts;
       var el = ts - t0;
 
-      var spP  = easeOut(Math.min(el / T_SPIRIT, 1));                              /* 0→1 spirit descending  */
-      var reP  = easeOut(Math.min(Math.max((el - T_SPIRIT) / 600, 0), 1));        /* 0→1 Christ restoring   */
-      var flP  = easeOut(Math.min(Math.max((el - T_FLOW) / CONFIG.SPIRIT_FLOW, 0), 1));  /* 0→1 dots flowing */
+      var spP  = easeOut(Math.min(el / T_SPIRIT, 1));
+      var reP  = easeOut(Math.min(Math.max((el - T_SPIRIT) / 500, 0), 1));
+      var asP  = easeOut(Math.min(Math.max((el - T_ASCEND) / 1600, 0), 1));
+      var flP  = easeOut(Math.min(Math.max((el - T_FLOW) / CONFIG.SPIRIT_FLOW, 0), 1));
+
+      /* Christ position animates from bottom to natural height during ascent phase */
+      var cp = { x: cpStart.x, y: cpStart.y + (cpEnd.y - cpStart.y) * asP };
 
       ctx.clearRect(0, 0, w, h);
       drawFaintRays(ctx, cp.x, cp.y, w, h, 0.08);
 
-      /* Lines — shift from grey to teal as each figure transforms */
+      /* Lines — fade in as Christ ascends, shift to teal when dots arrive */
       figs.forEach(function (f, i) {
         var figT = easeOut(Math.min(Math.max((flP - i * 0.10) / 0.3, 0), 1));
         ctx.save();
         ctx.strokeStyle = figT > 0.5 ? TEAL : LINE_COL;
-        ctx.globalAlpha = figT > 0.5 ? 0.45 : 0.35;
+        ctx.globalAlpha = (figT > 0.5 ? 0.45 : 0.35) * asP;
         ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
         ctx.restore();
@@ -1046,11 +1069,11 @@
       /* Figures */
       figs.forEach(function (f, i) {
         var hP    = Math.min(Math.max((flP - i * 0.10) / 0.60, 0), 1);
-        var bFill = hP >= 1 ? SPIRIT_RED : SIN;
+        var bFill = hP >= 1 ? SPIRIT_RED : PEARL;
         var cy2   = chestY(f.y, fSz);
         drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], bFill, PASTELS[i]);
 
-        /* Travelling pearl+gold orb, then landed — stagger 0.10 + travel 0.60 ensures all 5 land */
+        /* Travelling pearl+gold orb, then landed */
         if (hP > 0 && hP < 1) {
           var tx = cp.x + (f.x - cp.x) * hP;
           var ty = cp.y + (f.y - cp.y) * hP;
@@ -1064,7 +1087,7 @@
         }
       });
 
-      /* Christ — starts fully dark, body + head restore as Spirit arrives */
+      /* Christ — starts fully dark at bottom, restores as Spirit arrives, then rises */
       drawHuman(ctx, cp.x, cp.y, cSz, TEAL, SPIRIT_RED, TEAL);
       if (reP < 1) {
         ctx.save();
@@ -1077,10 +1100,10 @@
       drawGoldCentre(ctx, cp.x, chestY(cp.y, cSz), cOrbR);
       ctx.restore();
 
-      /* Spirit — drawn after Christ so it stays visible in front as it descends */
+      /* Spirit descends all the way from top to Christ's starting position at bottom */
       if (spP < 1) {
-        var spirY = spiritStartY + (cp.y - spiritStartY) * spP;
-        drawSpiritOrb(ctx, cp.x, spirY, spiritR);
+        var spirY = spiritStartY + (cpStart.y - spiritStartY) * spP;
+        drawSpiritOrb(ctx, cpStart.x, spirY, spiritR);
       }
 
       if (el < T_END) requestAnimationFrame(frame);
@@ -1107,12 +1130,15 @@
   window.VISUALS.orbState5Held = function (ctx, w, h) {
     var cp     = christXY(w, h);
     var figs   = figPositions(w, h);
+    figs.forEach(function (f) { f.y = h * 0.46; });
     var fSz = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz = Math.min(w, h) * CONFIG.CHRIST_SIZE;
 
     var aBodyR  = Math.min(w, h) * 0.22;
     var aBodyCx = w / 2;
-    var aBodyCy = h * 0.62;  /* pushed down so Christ reads as head above the ring */
+    /* top of ring = bottom of Christ body + HEAD_GAP_RATIO × Christ body-radius */
+    var christBodyBottom = cp.y + cSz * (0.14 + 0.25);
+    var aBodyCy = aBodyR + christBodyBottom + cSz * 0.25 * CONFIG.HEAD_GAP_RATIO;
 
     /* Symmetric pentagon:
        fig[0]=upper-left(234°)  fig[1]=lower-left(162°)  fig[2]=bottom(90°)
@@ -1122,10 +1148,6 @@
       return { x: aBodyCx + aBodyR * Math.cos(ANGLES[i]),
                y: aBodyCy + aBodyR * Math.sin(ANGLES[i]) };
     });
-
-    /* Enclosing ring: spans Christ's full head+body extent */
-    var christRingR  = cSz * 0.46;
-    var christRingCy = cp.y - cSz * 0.04;
 
     var T_MOVE = 1200;
     var T_RING = T_MOVE + 700;
@@ -1147,7 +1169,6 @@
         ctx.save();
         ctx.globalAlpha = rnP * 0.65;
         drawRing(ctx, aBodyCx, aBodyCy, aBodyR, TEAL);
-        drawRing(ctx, cp.x, christRingCy, christRingR, TEAL);
         ctx.restore();
       }
 
@@ -1212,9 +1233,8 @@
 
     var aBodyR   = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
     var aBodyCx  = w / 2;
-    var aBodyCy  = h * 0.62;
-    var christRingR  = cSz * 0.46;
-    var christRingCy = cp.y - cSz * 0.04;
+    var christBodyBottom = cp.y + cSz * (0.14 + 0.25);
+    var aBodyCy  = aBodyR + christBodyBottom + cSz * 0.25 * CONFIG.HEAD_GAP_RATIO;
 
     /* Figure target positions (same pentagon as orbState5Held) */
     var ANGLES  = [234, 162, 90, 18, 306].map(function (d) { return d * Math.PI / 180; });
@@ -1249,8 +1269,6 @@
       ctx.shadowBlur   = aBodyR * 0.25;
       ctx.shadowColor  = TEAL;
       ctx.beginPath(); ctx.arc(aBodyCx, aBodyCy, aBodyR, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur   = christRingR * 0.25;
-      ctx.beginPath(); ctx.arc(cp.x, christRingCy, christRingR, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
 
       /* Church figures at final ring positions */
@@ -1322,19 +1340,19 @@
 
     /* Beat-8 scene geometry (must match orbState5Held end-state) */
     var aBodyR  = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
-    var aBodyCx = w / 2,  aBodyCy = h * 0.62;
+    var aBodyCx = w / 2;
     var scaleTarget = centreR / aBodyR;   /* scene shrinks to fit the centre circle */
 
     var cp   = christXY(w, h);
     var figs = figPositions(w, h);
     var fSz  = Math.min(w, h) * CONFIG.FIGURE_SIZE;
     var cSz  = Math.min(w, h) * CONFIG.CHRIST_SIZE;
+    var christBodyBottom = cp.y + cSz * (0.14 + 0.25);
+    var aBodyCy = aBodyR + christBodyBottom + cSz * 0.25 * CONFIG.HEAD_GAP_RATIO;
     var ANGLES = [234, 162, 90, 18, 306].map(function (d) { return d * Math.PI / 180; });
     var targets = ANGLES.map(function (a) {
       return { x: aBodyCx + aBodyR * Math.cos(a), y: aBodyCy + aBodyR * Math.sin(a) };
     });
-    var christRingR  = cSz * 0.46;
-    var christRingCy = cp.y - cSz * 0.04;
 
     /* Reproduces orbState5Held end-state (rings + figures + Christ, no rays) */
     function drawScene() {
@@ -1344,8 +1362,6 @@
       ctx.shadowBlur   = aBodyR * 0.25;
       ctx.shadowColor  = TEAL;
       ctx.beginPath(); ctx.arc(aBodyCx, aBodyCy, aBodyR, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur   = christRingR * 0.25;
-      ctx.beginPath(); ctx.arc(cp.x, christRingCy, christRingR, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       targets.forEach(function (t, i) { drawChurchFig(ctx, t.x, t.y, fSz, PASTELS[i]); });
       ctx.save();
