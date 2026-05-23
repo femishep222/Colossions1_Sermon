@@ -10,42 +10,26 @@
   var INIT_DELAY   = 400;
 
   /* ─────────────────────────────────────────────
-     FLATTEN BEATS
-     Sub-beats are inserted immediately after their
-     parent, giving a simple linear sequence.
-  ───────────────────────────────────────────── */
-  var FLAT = [];
-  var TOTAL_MAIN = BEATS.length;   /* top-level beat count — denominator in counter */
-  BEATS.forEach(function (beat, i) {
-    beat._label = String(i + 1);
-    FLAT.push(beat);
-    (beat.subBeats || []).forEach(function (sub, j) {
-      sub._label = String(i + 1) + String.fromCharCode(97 + j);  /* "2a", "6a", "8a" … */
-      FLAT.push(sub);
-    });
-  });
-
-  /* ─────────────────────────────────────────────
      STATE
+     phase:   'intro' | 'active' | 'outro'
+     beatIdx: 0-based index into BEATS
+     stage:   1 | 2 | 3  (only meaningful when active)
   ───────────────────────────────────────────── */
-  var idx          = -1;
-  var lastWheel    = 0;
-  var touchY0      = 0;
+  var phase      = 'intro';
+  var beatIdx    = 0;
+  var stage      = 1;
+  var lastWheel  = 0;
+  var touchY0    = 0;
   var cancelVisual = null;
   var replayTimer  = null;
-
-  function scheduleAutoReplay() {
-    if (replayTimer) clearTimeout(replayTimer);
-    replayTimer = setTimeout(function () { replay(); }, CONFIG.AUTO_REPLAY_MS);
-  }
 
   /* ─────────────────────────────────────────────
      DOM REFS
   ───────────────────────────────────────────── */
   var canvas         = document.getElementById('visual-canvas');
   var ctx            = canvas.getContext('2d');
-  var sectionTitleEl = document.getElementById('section-title');
-  var scriptureBlock = document.getElementById('scripture-block');
+  var scriptureTop   = document.getElementById('scripture-top');
+  var scriptureBot   = document.getElementById('scripture-bottom');
   var counter        = document.getElementById('beat-counter');
   var navPrev        = document.getElementById('nav-prev');
   var navNext        = document.getElementById('nav-next');
@@ -54,81 +38,169 @@
 
   /* ─────────────────────────────────────────────
      CANVAS SIZING
-     Setting canvas.width/height clears the surface;
-     we immediately re-render the current visual.
   ───────────────────────────────────────────── */
   function sizeCanvas() {
     canvas.width  = storyRight.offsetWidth;
     canvas.height = storyRight.offsetHeight;
-    if (idx >= 0) renderVisual(FLAT[idx]);
+    if (phase === 'active') renderVisualForBeat(BEATS[beatIdx]);
+    if (phase !== 'active') paintBlack();
+  }
+
+  /* ─────────────────────────────────────────────
+     BLACK SCREEN HELPERS
+  ───────────────────────────────────────────── */
+  function paintBlack() {
+    if (cancelVisual) { cancelVisual(); cancelVisual = null; }
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function enterBlackout() {
+    document.body.classList.add('is-blackout');
+    paintBlack();
+    if (counter)  counter.textContent  = '';
+    if (navPrev)  navPrev.disabled     = true;
+    if (navNext)  navNext.disabled     = true;
+  }
+
+  function exitBlackout() {
+    document.body.classList.remove('is-blackout');
+  }
+
+  /* ─────────────────────────────────────────────
+     AUTO REPLAY
+  ───────────────────────────────────────────── */
+  function scheduleAutoReplay() {
+    if (replayTimer) clearTimeout(replayTimer);
+    replayTimer = setTimeout(function () {
+      if (phase === 'active') renderVisualForBeat(BEATS[beatIdx]);
+    }, CONFIG.AUTO_REPLAY_MS);
   }
 
   /* ─────────────────────────────────────────────
      NAVIGATION
   ───────────────────────────────────────────── */
-  function next()   { advance(1);  }
-  function prev()   { advance(-1); }
-  function replay() { if (idx >= 0) go(idx); }
+  function next() { advance(1);  }
+  function prev() { advance(-1); }
 
   function advance(dir) {
-    var target = idx + dir;
-    if (target < 0 || target >= FLAT.length) return;
-    go(target);
+    if (dir > 0) {
+      if (phase === 'intro') {
+        exitBlackout();
+        phase = 'active';
+        beatIdx = 0;
+        stage = 1;
+        goStage();
+        return;
+      }
+      if (phase === 'outro') return;
+
+      /* active: advance stage or beat */
+      if (stage < 3) {
+        stage++;
+        goStage();
+      } else {
+        if (beatIdx < BEATS.length - 1) {
+          beatIdx++;
+          stage = 1;
+          goStage();
+        } else {
+          phase = 'outro';
+          enterBlackout();
+        }
+      }
+    } else {
+      if (phase === 'outro') {
+        exitBlackout();
+        phase = 'active';
+        /* stay at last beat, stage 3 */
+        goStage();
+        return;
+      }
+      if (phase === 'intro') return;
+
+      /* active: go back */
+      if (stage > 1) {
+        stage--;
+        goStage();
+      } else {
+        if (beatIdx > 0) {
+          beatIdx--;
+          stage = 3;
+          goStage();
+        } else {
+          phase = 'intro';
+          enterBlackout();
+        }
+      }
+    }
   }
 
   /* ─────────────────────────────────────────────
-     GO TO BEAT
+     GO TO CURRENT STAGE
   ───────────────────────────────────────────── */
-  function go(i) {
-    idx = i;
-    var beat = FLAT[i];
+  function goStage() {
+    var beat = BEATS[beatIdx];
 
-    document.body.classList.toggle('is-blackout', beat.visual === 'blackScreen');
-    renderLeft(beat);
-    renderVisual(beat);
-    updateNav(i);
-    scheduleAutoReplay();
+    if (stage === 1) {
+      renderScriptureSlot(scriptureTop, beat.scriptureA);
+      renderScriptureSlot(scriptureBot, null);
+      /* canvas unchanged — holds previous frame */
+    } else if (stage === 2) {
+      renderScriptureSlot(scriptureTop, beat.scriptureA);
+      renderScriptureSlot(scriptureBot, null);
+      renderVisualForBeat(beat);
+      scheduleAutoReplay();
+    } else {
+      renderScriptureSlot(scriptureTop, beat.scriptureA);
+      renderScriptureSlot(scriptureBot, beat.scriptureB);
+      /* canvas unchanged */
+    }
+
+    updateNav();
 
     document.dispatchEvent(new CustomEvent('beat-change', {
-      detail: { idx: i, total: FLAT.length, id: beat.id, visual: beat.visual }
+      detail: { beatIdx: beatIdx, stage: stage, id: beat.id, visual: beat.visual }
     }));
   }
 
   /* ─────────────────────────────────────────────
-     LEFT PANEL
+     LEFT PANEL — render a scripture slot
+     data: null | single object | array of objects
   ───────────────────────────────────────────── */
-  function renderLeft(beat) {
-    sectionTitleEl.textContent = beat.sectionTitle || '';
-    scriptureBlock.innerHTML   = '';
+  function renderScriptureSlot(el, data) {
+    el.innerHTML = '';
+    if (!data) return;
 
-    if (!beat.scripture) return;
-
-    var items = Array.isArray(beat.scripture) ? beat.scripture : [beat.scripture];
+    var items = Array.isArray(data) ? data : [data];
     items.forEach(function (item) {
       var wrapper = document.createElement('div');
-      wrapper.className = 'scripture-item' + (/^col/i.test(item.ref) ? ' is-col' : '');
+      var cls = 'scripture-item';
+      if (item.provocation) cls += ' is-provocation';
+      if (item.crimson)     cls += ' is-crimson';
+      if (!item.provocation && item.ref && /^col/i.test(item.ref)) cls += ' is-col';
+      wrapper.className = cls;
 
-      var ref = document.createElement('p');
-      ref.className   = 'scripture-ref';
-      ref.textContent = item.ref;
+      if (item.ref && !item.provocation) {
+        var ref = document.createElement('p');
+        ref.className   = 'scripture-ref';
+        ref.textContent = item.ref;
+        wrapper.appendChild(ref);
+      }
 
       var text = document.createElement('p');
       text.className   = 'scripture-text';
-      text.textContent = '“' + item.text + '”';
-
-      wrapper.appendChild(ref);
+      text.textContent = item.provocation ? item.text : '“' + item.text + '”';
       wrapper.appendChild(text);
-      scriptureBlock.appendChild(wrapper);
+
+      el.appendChild(wrapper);
     });
   }
 
   /* ─────────────────────────────────────────────
      VISUAL RENDERING
-     Each visual function may return a cancel fn
-     that stops its animation loop; we call it
-     before starting the next visual.
   ───────────────────────────────────────────── */
-  function renderVisual(beat) {
+  function renderVisualForBeat(beat) {
     if (cancelVisual) { cancelVisual(); cancelVisual = null; }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -141,10 +213,11 @@
   /* ─────────────────────────────────────────────
      BEAT COUNTER + NAV BUTTONS
   ───────────────────────────────────────────── */
-  function updateNav(i) {
-    if (counter) counter.textContent = FLAT[i]._label + ' \xb7 ' + TOTAL_MAIN;
-    if (navPrev) navPrev.disabled = (i === 0);
-    if (navNext) navNext.disabled = (i === FLAT.length - 1);
+  function updateNav() {
+    var beat = BEATS[beatIdx];
+    if (counter) counter.textContent = beat.id + ' \xb7 ' + BEATS.length;
+    if (navPrev) navPrev.disabled = (phase === 'active' && beatIdx === 0 && stage === 1);
+    if (navNext) navNext.disabled = false;
   }
 
   /* ─────────────────────────────────────────────
@@ -152,14 +225,11 @@
   ───────────────────────────────────────────── */
   function attachListeners() {
 
-    /* Full-page click overlay */
     if (overlay) overlay.addEventListener('click', next);
 
-    /* Nav buttons — stop propagation so overlay doesn't also fire */
     if (navNext) navNext.addEventListener('click', function (e) { e.stopPropagation(); next(); });
     if (navPrev) navPrev.addEventListener('click', function (e) { e.stopPropagation(); prev(); });
 
-    /* Mouse wheel — debounced, bidirectional */
     window.addEventListener('wheel', function (e) {
       if (e.ctrlKey || e.metaKey) return;
       e.preventDefault();
@@ -169,7 +239,6 @@
       if (e.deltaY > 0) next(); else prev();
     }, { passive: false });
 
-    /* Keyboard */
     document.addEventListener('keydown', function (e) {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
@@ -177,11 +246,11 @@
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault(); prev();
       } else if (e.code === 'Space') {
-        e.preventDefault(); replay();
+        e.preventDefault();
+        if (phase === 'active') renderVisualForBeat(BEATS[beatIdx]);
       }
     });
 
-    /* Touch — swipe up = forward, swipe down = backward */
     document.addEventListener('touchstart', function (e) {
       touchY0 = e.touches[0].clientY;
     }, { passive: true });
@@ -192,7 +261,6 @@
       if (delta > 0) next(); else prev();
     }, { passive: true });
 
-    /* Resize — re-measure canvas and re-render current visual */
     window.addEventListener('resize', sizeCanvas);
   }
 
@@ -202,7 +270,9 @@
   function init() {
     attachListeners();
     sizeCanvas();
-    setTimeout(function () { go(0); }, INIT_DELAY);
+    setTimeout(function () {
+      enterBlackout();  /* start in black intro phase */
+    }, INIT_DELAY);
   }
 
   document.addEventListener('DOMContentLoaded', init);

@@ -150,6 +150,31 @@
   /* Chest = centre of the body circle */
   function chestY(cy, size) { return cy + size * 0.14; }
 
+  /* Full cross + radial connection lines in one call */
+  function drawCrossAndLines(ctx, cp, figs, crossW, crossH, crossLW) {
+    drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
+    ctx.save();
+    ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
+    figs.forEach(function (f) {
+      ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  /* Teal body circle + church figures on circumference + Christ above — the assembled body */
+  function drawAssembledBody(ctx, cp, aBodyCx, aBodyCy, aBodyR, targets, fSz, cSz) {
+    ctx.save();
+    ctx.globalAlpha = 0.65; ctx.fillStyle = TEAL;
+    ctx.shadowBlur = aBodyR * 0.25; ctx.shadowColor = TEAL;
+    ctx.beginPath(); ctx.arc(aBodyCx, aBodyCy, aBodyR, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    targets.forEach(function (t, i) { drawChurchFig(ctx, t.x, t.y, fSz, PASTELS[i]); });
+    ctx.save();
+    ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
+    drawChrist(ctx, cp.x, cp.y, cSz);
+    ctx.restore();
+  }
+
   /* Christ: teal outline, pearl body, teal head, gold chest dot */
   function drawChrist(ctx, cx, cy, size) {
     drawHuman(ctx, cx, cy, size, TEAL, SPIRIT_RED, TEAL);
@@ -346,11 +371,6 @@
   window.VISUALS = {};
 
   /* ── Plain black screen — used for opening and closing beats ── */
-  window.VISUALS.blackScreen = function (ctx, w, h) {
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, w, h);
-  };
-
   /* ── Image helper: contain-scale an image in the canvas area below the title overlay ── */
   function drawImageContain(ctx, img, w, h) {
     var topPad = h * CONFIG.IMAGE_TOP_PAD;
@@ -373,20 +393,7 @@
     return null;
   };
 
-  /* ── Beat 2: lake reflection image ── */
-  var _imgLake = null;
-  window.VISUALS.imageLakeReflection = function (ctx, w, h) {
-    if (_imgLake && _imgLake.complete) {
-      drawImageContain(ctx, _imgLake, w, h);
-    } else {
-      _imgLake = new Image();
-      _imgLake.onload = function () { drawImageContain(ctx, _imgLake, w, h); };
-      _imgLake.src = 'Assets/lakereflection(beat2).jpg';
-    }
-    return null;
-  };
-
-  /* ── Beat 2a: roman eikon banner ── */
+  /* ── Beat 2: roman eikon banner ── */
   var _romEikon = null;
   window.VISUALS.romaneikon = function (ctx, w, h) {
     if (_romEikon && _romEikon.complete) {
@@ -666,37 +673,6 @@
   };
 
   /* ── Beat 6a: State 4b static — cross + lines + figures with sin orbs at chest ── */
-  window.VISUALS.orbState4bStatic = function (ctx, w, h) {
-    var cp    = christXY(w, h);
-    var figs  = figPositions(w, h);
-    var fSz   = Math.min(w, h) * CONFIG.FIGURE_SIZE;
-    var cSz   = Math.min(w, h) * CONFIG.CHRIST_SIZE;
-    var sinR  = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
-    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
-    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
-    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
-
-    ctx.clearRect(0, 0, w, h);
-    drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
-
-    ctx.save();
-    ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
-    figs.forEach(function (f) {
-      ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
-    });
-    ctx.restore();
-
-    figs.forEach(function (f, i) {
-      drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
-      drawSinOrb(ctx, f.x, chestY(f.y, fSz), sinR);
-    });
-
-    ctx.save();
-    ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
-    drawChrist(ctx, cp.x, cp.y, cSz);
-    ctx.restore();
-  };
-
   /* ── Beat 7a: Cross grows in; Christ and 5 people present from the start ── */
   window.VISUALS.orbState4aPhase1 = function (ctx, w, h) {
     var cp      = christXY(w, h);
@@ -719,16 +695,8 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      /* Cross grows in */
-      drawCross(ctx, cp.x, cp.y, crossW * xP, crossH * xP, CONFIG.CROSS_LINE_ALPHA, crossLW);
-
-      /* Connection lines — present from the start */
-      ctx.save();
-      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
-      figs.forEach(function (f) {
-        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
-      });
-      ctx.restore();
+      /* Cross grows in; lines present from the start */
+      drawCrossAndLines(ctx, cp, figs, crossW * xP, crossH * xP, crossLW);
 
       /* Figures — present from the start */
       figs.forEach(function (f, i) {
@@ -743,64 +711,6 @@
       ctx.restore();
 
       if (xP < 1) requestAnimationFrame(frame);
-      else running = false;
-    }
-    requestAnimationFrame(frame);
-    return function () { running = false; };
-  };
-
-  /* ── Beat 7b: Son sheds blood drops into 5 people ── */
-  window.VISUALS.orbState4aPhase2 = function (ctx, w, h) {
-    var cp      = christXY(w, h);
-    var figs    = figPositions(w, h);
-    cp.y = h * CONFIG.FIGURES_Y;
-    figs.forEach(function (f) { f.y = h * 0.46; });
-    var fSz     = Math.min(w, h) * CONFIG.FIGURE_SIZE;
-    var cSz     = Math.min(w, h) * CONFIG.CHRIST_SIZE;
-    var sinR    = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
-    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
-    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
-    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
-    var BD      = CONFIG.BLOOD_DURATION;
-    var running = true, t0 = null;
-
-    function drawSettled() {
-      drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
-      ctx.save();
-      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
-      figs.forEach(function (f) {
-        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
-      });
-      ctx.restore();
-      figs.forEach(function (f, i) {
-        drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
-        drawSinOrb(ctx, f.x, chestY(f.y, fSz), sinR);
-      });
-      ctx.save();
-      ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
-      drawChrist(ctx, cp.x, cp.y, cSz);
-      ctx.restore();
-    }
-
-    function frame(ts) {
-      if (!running) return;
-      if (!t0) t0 = ts;
-      var bP = easeOut(Math.min((ts - t0) / BD, 1));
-
-      ctx.clearRect(0, 0, w, h);
-      drawSettled();
-
-      ctx.save();
-      ctx.fillStyle   = BLOOD;
-      ctx.globalAlpha = Math.sin(bP * Math.PI);
-      figs.forEach(function (f) {
-        var bx = cp.x + (f.x - cp.x) * bP;
-        var by = cp.y + (f.y - cp.y) * bP;
-        ctx.beginPath(); ctx.arc(bx, by, sinR, 0, Math.PI * 2); ctx.fill();
-      });
-      ctx.restore();
-
-      if (bP < 1) requestAnimationFrame(frame);
       else running = false;
     }
     requestAnimationFrame(frame);
@@ -834,14 +744,7 @@
       var tP = easeOut(Math.min(Math.max((el - T_SIN_START) / CONFIG.SIN_ORB_TRAVEL, 0), 1));
 
       ctx.clearRect(0, 0, w, h);
-      drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
-
-      ctx.save();
-      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
-      figs.forEach(function (f) {
-        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
-      });
-      ctx.restore();
+      drawCrossAndLines(ctx, cp, figs, crossW, crossH, crossLW);
 
       /* Figures — inner body fades from SIN to PEARL as sin departs */
       figs.forEach(function (f, i) {
@@ -912,14 +815,7 @@
       var sP = easeOut(Math.min((ts - t0) / SPIRIT, 1));
 
       ctx.clearRect(0, 0, w, h);
-      drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
-
-      ctx.save();
-      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
-      figs.forEach(function (f) {
-        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
-      });
-      ctx.restore();
+      drawCrossAndLines(ctx, cp, figs, crossW, crossH, crossLW);
 
       figs.forEach(function (f, i) { drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], PEARL, PASTELS[i]); });
 
@@ -934,78 +830,6 @@
       drawSpiritOrb(ctx, cp.x, spiritY, spiritR);
 
       if (sP < 1) requestAnimationFrame(frame);
-      else running = false;
-    }
-    requestAnimationFrame(frame);
-    return function () { running = false; };
-  };
-
-  /* ── Beat 6b: State 4b — sin-orbs rise to Christ, Christ darkens, Spirit rises ── */
-  window.VISUALS.orbState4b = function (ctx, w, h) {
-    var cp      = christXY(w, h);
-    var figs    = figPositions(w, h);
-    var fSz   = Math.min(w, h) * CONFIG.FIGURE_SIZE;
-    var cSz   = Math.min(w, h) * CONFIG.CHRIST_SIZE;
-    var sinR  = fSz * 0.25 * CONFIG.SIN_ORB_RATIO;
-    var cOrbR   = cSz * 0.25 * CONFIG.CENTRE_RATIO;
-    var crossLW = Math.min(w, h) * CONFIG.CROSS_LINE_SCALE;
-    var crossH  = cSz * CONFIG.CROSS_H_RATIO;
-    var crossW  = cSz * CONFIG.CROSS_W_RATIO;
-    var TRAVEL  = CONFIG.SIN_ORB_TRAVEL;
-    var SPIRIT  = 900;
-    var running = true, t0 = null;
-
-    function frame(ts) {
-      if (!running) return;
-      if (!t0) t0 = ts;
-      var elapsed = ts - t0;
-      var tP = easeOut(Math.min(elapsed / TRAVEL, 1));
-      var sP = easeOut(Math.min(Math.max((elapsed - TRAVEL) / SPIRIT, 0), 1));
-
-      ctx.clearRect(0, 0, w, h);
-      drawCross(ctx, cp.x, cp.y, crossW, crossH, CONFIG.CROSS_LINE_ALPHA, crossLW);
-
-      /* Lines */
-      ctx.save();
-      ctx.strokeStyle = LINE_COL; ctx.lineWidth = 1; ctx.globalAlpha = 0.35;
-      figs.forEach(function (f) {
-        ctx.beginPath(); ctx.moveTo(cp.x, cp.y); ctx.lineTo(f.x, f.y); ctx.stroke();
-      });
-      ctx.restore();
-
-      /* Figures — sin-orb shrinks and travels; chest becomes hollow white */
-      figs.forEach(function (f, i) {
-        drawHuman(ctx, f.x, f.y, fSz, PASTELS[i], SIN, PASTELS[i]);
-        var cy2 = chestY(f.y, fSz);
-        if (tP < 1) {
-          /* Orb in transit: show at interpolated position */
-          var bx = f.x  + (cp.x - f.x)  * tP;
-          var by = cy2 + (cp.y - cy2) * tP;
-          drawSinOrb(ctx, bx, by, sinR * (1 - tP * 0.4));
-        }
-      });
-
-      /* Christ: body drawn first so pearl fill doesn't cover the gold dot */
-      drawHuman(ctx, cp.x, cp.y, cSz, TEAL, SPIRIT_RED, TEAL);
-      if (sP > 0) {
-        ctx.save();
-        ctx.globalAlpha = sP;
-        drawHuman(ctx, cp.x, cp.y, cSz, TEAL, '#0D0D0D', '#0D0D0D');
-        ctx.restore();
-      }
-      ctx.save();
-      ctx.globalAlpha = 1 - sP;
-      drawGoldCentre(ctx, cp.x, chestY(cp.y, cSz), cOrbR);
-      ctx.restore();
-
-      /* Spirit: pearl outer, gold centre — rises from Christ */
-      if (sP > 0) {
-        var spiritR = cSz * 0.25 * (1 - CONFIG.BAND_RATIO);
-        var spiritY = cp.y - sP * h * 0.22;
-        drawSpiritOrb(ctx, cp.x, spiritY, spiritR);
-      }
-
-      if (elapsed < TRAVEL + SPIRIT) requestAnimationFrame(frame);
       else running = false;
     }
     requestAnimationFrame(frame);
@@ -1225,111 +1049,6 @@
     return function () { running = false; };
   };
 
-  /* ── Final beat: gold rays from Christ through each church figure — "ALL" ── */
-  window.VISUALS.orbStateAll = function (ctx, w, h) {
-    var cp   = christXY(w, h);
-    var fSz  = Math.min(w, h) * CONFIG.FIGURE_SIZE;
-    var cSz  = Math.min(w, h) * CONFIG.CHRIST_SIZE;
-
-    var aBodyR   = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
-    var aBodyCx  = w / 2;
-    var christBodyBottom = cp.y + cSz * (0.14 + 0.25);
-    var aBodyCy  = aBodyR + christBodyBottom + cSz * 0.25 * CONFIG.HEAD_GAP_RATIO;
-
-    /* Figure target positions (same pentagon as orbState5Held) */
-    var ANGLES  = [234, 162, 90, 18, 306].map(function (d) { return d * Math.PI / 180; });
-    var targets = ANGLES.map(function (a) {
-      return { x: aBodyCx + aBodyR * Math.cos(a), y: aBodyCy + aBodyR * Math.sin(a) };
-    });
-
-    /* Ray directions: from Christ normalised toward each figure — rays pass through them */
-    var rayDirs = targets.map(function (t) {
-      var dx = t.x - cp.x, dy = t.y - cp.y;
-      var d  = Math.sqrt(dx * dx + dy * dy);
-      return { dx: dx / d, dy: dy / d };
-    });
-
-    var maxLen   = Math.sqrt(w * w + h * h) * 0.54;
-    var tipHW    = Math.min(w, h) * CONFIG.RAY_TIP_WIDTH;
-    var DURATION = 2400;
-    var running  = true, t0 = null;
-
-    function frame(ts) {
-      if (!running) return;
-      if (!t0) t0 = ts;
-      var p = easeOut(Math.min((ts - t0) / DURATION, 1));
-
-      ctx.clearRect(0, 0, w, h);
-      drawFaintRays(ctx, cp.x, cp.y, w, h, 0.07);
-
-      /* Static final state: solid teal circles */
-      ctx.save();
-      ctx.globalAlpha  = 0.65;
-      ctx.fillStyle    = TEAL;
-      ctx.shadowBlur   = aBodyR * 0.25;
-      ctx.shadowColor  = TEAL;
-      ctx.beginPath(); ctx.arc(aBodyCx, aBodyCy, aBodyR, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-
-      /* Church figures at final ring positions */
-      targets.forEach(function (t, i) {
-        drawChurchFig(ctx, t.x, t.y, fSz, PASTELS[i]);
-      });
-
-      /* Christ */
-      ctx.save();
-      ctx.shadowBlur = cSz * 0.08; ctx.shadowColor = TEAL;
-      drawChrist(ctx, cp.x, cp.y, cSz);
-      ctx.restore();
-
-      /* Gold rays — drawn last, on top, passing through the figures */
-      rayDirs.forEach(function (ray) {
-        var len  = maxLen * p;
-        var tipX = cp.x + ray.dx * len;
-        var tipY = cp.y + ray.dy * len;
-        var px   = -ray.dy, py = ray.dx;
-        var hw   = tipHW * p;
-
-        ctx.save();
-        ctx.globalAlpha = 0.45 * p;
-        ctx.shadowBlur  = hw * 2; ctx.shadowColor = GOLD;
-        ctx.fillStyle   = GOLD;
-        ctx.beginPath();
-        ctx.moveTo(cp.x, cp.y);
-        ctx.lineTo(tipX - px * hw, tipY - py * hw);
-        ctx.lineTo(tipX + px * hw, tipY + py * hw);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-
-        /* "ALL" text at 40% along the ray */
-        if (len > cSz * 1.5) {
-          var midX     = cp.x + ray.dx * len * 0.40;
-          var midY     = cp.y + ray.dy * len * 0.40;
-          var angle    = Math.atan2(ray.dy, ray.dx);
-          if (Math.cos(angle) < 0) angle += Math.PI;
-          var fontSize = Math.min(w, h) * 0.022;
-          ctx.save();
-          ctx.globalAlpha   = p * 0.85;
-          ctx.translate(midX, midY);
-          ctx.rotate(angle);
-          ctx.font          = '300 ' + fontSize + 'px Inter, sans-serif';
-          ctx.fillStyle     = PEARL;
-          ctx.textAlign     = 'center';
-          ctx.textBaseline  = 'middle';
-          ctx.letterSpacing = '0.18em';
-          ctx.fillText('ALL', 0, 0);
-          ctx.restore();
-        }
-      });
-
-      if (p < 1) requestAnimationFrame(frame);
-      else running = false;
-    }
-    requestAnimationFrame(frame);
-    return function () { running = false; };
-  };
-
   /* ── Beat 9: beat-8 scene shrinks into the centre of a growing orb ── */
   window.VISUALS.orbFull = function (ctx, w, h) {
     var orbCx  = w / 2,  orbCy  = h * CONFIG.ORB_CENTRE_Y;
@@ -1356,19 +1075,7 @@
 
     /* Reproduces orbState5Held end-state (rings + figures + Christ, no rays) */
     function drawScene() {
-      ctx.save();
-      ctx.globalAlpha  = 0.65;
-      ctx.fillStyle    = TEAL;
-      ctx.shadowBlur   = aBodyR * 0.25;
-      ctx.shadowColor  = TEAL;
-      ctx.beginPath(); ctx.arc(aBodyCx, aBodyCy, aBodyR, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-      targets.forEach(function (t, i) { drawChurchFig(ctx, t.x, t.y, fSz, PASTELS[i]); });
-      ctx.save();
-      ctx.shadowBlur  = cSz * 0.08;
-      ctx.shadowColor = TEAL;
-      drawChrist(ctx, cp.x, cp.y, cSz);
-      ctx.restore();
+      drawAssembledBody(ctx, cp, aBodyCx, aBodyCy, aBodyR, targets, fSz, cSz);
     }
 
     var DURATION = 1600;

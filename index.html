@@ -14,22 +14,24 @@
   <!-- Two-column stage -->
   <main id="story-stage">
 
-    <!-- Left: scripture + sermon label at bottom -->
+    <!-- Left: top scripture slot + bottom scripture slot -->
     <div id="story-left">
-      <div id="scripture-block">
-        <!-- scripture items injected by app.js -->
+      <div id="scripture-top">
+        <!-- top scripture injected by app.js -->
       </div>
-      <div id="left-bottom">
-        <span id="sermon-title">Images of IN-dwelling</span>
-        <span id="series-ref">Colossians 1:15-23</span>
+      <div id="scripture-bottom">
+        <!-- bottom scripture injected by app.js -->
       </div>
     </div>
 
-    <!-- Right: canvas + section title (bottom-left) + beat nav (bottom-right) -->
+    <!-- Right: canvas + presentation title (bottom-left) + beat nav (bottom-right) -->
     <div id="story-right">
       <canvas id="visual-canvas" aria-hidden="true"></canvas>
       <div id="right-bottom">
-        <h2 id="section-title"></h2>
+        <div id="presentation-title">
+          <span id="sermon-title">Images of IN-dwelling</span>
+          <span id="series-ref">Colossians 1:15–23</span>
+        </div>
         <nav id="beat-nav" aria-label="Sermon navigation">
           <button id="nav-prev" aria-label="Previous beat" title="Previous (&#8592; &#8593;)">&#8592;</button>
           <span id="beat-counter" aria-live="polite"></span>
