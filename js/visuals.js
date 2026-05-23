@@ -269,11 +269,13 @@
     var pC   = Math.min(Math.max(p, 0.001), 0.999);
     var s0   = Math.max(0, p - hw);
     var s1   = Math.min(1, p + hw);
-    grad.addColorStop(0,    'rgba(255, 255, 255, 0)');
-    if (s0 > 0.002)  grad.addColorStop(s0,  'rgba(255, 255, 255, 0)');
-    grad.addColorStop(pC,   'rgba(163, 0, 0, 0.15)');
-    if (s1 < 0.998)  grad.addColorStop(s1,  'rgba(255, 255, 255, 0)');
-    grad.addColorStop(1,    'rgba(255, 255, 255, 0)');
+    /* Use rgba(255,0,0,0) — not rgba(255,255,255,0) — for transparent stops.
+       Premultiplied alpha interpolation through white causes pearl/white fringing. */
+    grad.addColorStop(0,    'rgba(255, 0, 0, 0)');
+    if (s0 > 0.002)  grad.addColorStop(s0,  'rgba(255, 0, 0, 0)');
+    grad.addColorStop(pC,   'rgba(163, 0, 0, 0.38)');
+    if (s1 < 0.998)  grad.addColorStop(s1,  'rgba(255, 0, 0, 0)');
+    grad.addColorStop(1,    'rgba(255, 0, 0, 0)');
 
     ctx.save();
     ctx.beginPath();
@@ -594,14 +596,9 @@
       ctx.clearRect(0, 0, w, h);
       drawFaintRays(ctx, cx, orbCy, w, h, 0.12);
 
-      /* Spirit band (SPIRIT_RED fill) — always full opacity so the ring stays pink */
-      ctx.save();
-      ctx.shadowBlur = 0;
-      ctx.beginPath(); ctx.arc(cx, orbCy, innerR, 0, Math.PI * 2);
-      ctx.fillStyle = SPIRIT_RED; ctx.fill();
-      ctx.restore();
-
-      /* Gold outer ring — fades out as figure fades in */
+      /* Gold outer ring — fades out as figure fades in.
+         Gradient fills the whole circle but SPIRIT_RED is painted on top immediately
+         after, so the band is never obscured (mirrors drawOrbRings draw order). */
       ctx.save();
       ctx.globalAlpha = 1 - p;
       ctx.shadowBlur  = bigR * 0.65; ctx.shadowColor = GOLD;
@@ -611,8 +608,12 @@
       ctx.fillStyle = gGrad; ctx.fill();
       ctx.restore();
 
-      /* Spirit pulse — always running, same as orbState2 */
-      drawSpiritPulse(ctx, cx, orbCy, bigR, ts - t0);
+      /* Spirit band — always full opacity, drawn after gold so it is never covered */
+      ctx.save();
+      ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(cx, orbCy, innerR, 0, Math.PI * 2);
+      ctx.fillStyle = SPIRIT_RED; ctx.fill();
+      ctx.restore();
 
       /* Son teal centre — fades out as figure fades in */
       ctx.save();
@@ -626,6 +627,11 @@
       ctx.shadowBlur  = figH * 0.04; ctx.shadowColor = TEAL;
       drawChrist(ctx, cx, figCy, figH);
       ctx.restore();
+
+      /* Spirit pulse drawn AFTER the figure so it always sits on top of whatever
+         fills the spirit band — at p=1 the figure's inner fill covers the band,
+         so the pulse must be the very last layer drawn there */
+      drawSpiritPulse(ctx, cx, orbCy, bigR, ts - t0);
 
       /* Trinity labels — SPIRIT in band, FATHER in orb centre, SON at Christ's head */
       ctx.save();
@@ -671,8 +677,8 @@
       var elapsed = ts - t0;
       var cDelay = CONFIG.ANIM_DURATION * 0.07;
 
-      var cP = easeOut(Math.min(elapsed / cDelay, 1));          /* Christ fades in */
-      var fP = easeOut(Math.min(Math.max(elapsed - cDelay, 0) / FD, 1));  /* figures */
+      var fP = easeOut(Math.min(elapsed / FD, 1));                          /* figures fade in first */
+      var cP = easeOut(Math.min(Math.max(elapsed - FD, 0) / cDelay, 1));  /* Christ follows */
 
       ctx.clearRect(0, 0, w, h);
 
