@@ -20,8 +20,9 @@
   var stage      = 1;
   var lastWheel  = 0;
   var touchY0    = 0;
-  var cancelVisual = null;
-  var replayTimer  = null;
+  var cancelVisual  = null;
+  var currentVisual = null;  /* visual key currently rendered on canvas */
+  var replayTimer   = null;
 
   /* ─────────────────────────────────────────────
      DOM REFS
@@ -51,6 +52,7 @@
   ───────────────────────────────────────────── */
   function paintBlack() {
     if (cancelVisual) { cancelVisual(); cancelVisual = null; }
+    currentVisual = null;
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
@@ -80,6 +82,10 @@
   /* ─────────────────────────────────────────────
      NAVIGATION
   ───────────────────────────────────────────── */
+  /* First/last valid stage for a beat — skip null-scripture stages */
+  function firstStage(beat) { return beat.scriptureA ? 1 : 2; }
+  function lastStage(beat)  { return beat.scriptureB ? 3 : 2; }
+
   function next() { advance(1);  }
   function prev() { advance(-1); }
 
@@ -89,20 +95,32 @@
         exitBlackout();
         phase = 'active';
         beatIdx = 0;
-        stage = 1;
+        stage = firstStage(BEATS[0]);
         goStage();
         return;
       }
       if (phase === 'outro') return;
 
-      /* active: advance stage or beat */
-      if (stage < 3) {
-        stage++;
+      var beat = BEATS[beatIdx];
+      if (stage === 1) {
+        stage = 2;
         goStage();
+      } else if (stage === 2) {
+        if (beat.scriptureB) {
+          stage = 3;
+          goStage();
+        } else if (beatIdx < BEATS.length - 1) {
+          beatIdx++;
+          stage = firstStage(BEATS[beatIdx]);
+          goStage();
+        } else {
+          phase = 'outro';
+          enterBlackout();
+        }
       } else {
         if (beatIdx < BEATS.length - 1) {
           beatIdx++;
-          stage = 1;
+          stage = firstStage(BEATS[beatIdx]);
           goStage();
         } else {
           phase = 'outro';
@@ -113,20 +131,32 @@
       if (phase === 'outro') {
         exitBlackout();
         phase = 'active';
-        /* stay at last beat, stage 3 */
+        stage = lastStage(BEATS[beatIdx]);
         goStage();
         return;
       }
       if (phase === 'intro') return;
 
-      /* active: go back */
-      if (stage > 1) {
-        stage--;
+      var beat = BEATS[beatIdx];
+      if (stage === 3) {
+        stage = 2;
         goStage();
+      } else if (stage === 2) {
+        if (beat.scriptureA) {
+          stage = 1;
+          goStage();
+        } else if (beatIdx > 0) {
+          beatIdx--;
+          stage = lastStage(BEATS[beatIdx]);
+          goStage();
+        } else {
+          phase = 'intro';
+          enterBlackout();
+        }
       } else {
         if (beatIdx > 0) {
           beatIdx--;
-          stage = 3;
+          stage = lastStage(BEATS[beatIdx]);
           goStage();
         } else {
           phase = 'intro';
@@ -145,7 +175,14 @@
     if (stage === 1) {
       renderScriptureSlot(scriptureTop, beat.scriptureA);
       renderScriptureSlot(scriptureBot, null);
-      /* canvas unchanged — holds previous frame */
+      /* clear canvas if entering a different visual; restart if same visual */
+      if (beat.visual !== currentVisual) {
+        if (cancelVisual) { cancelVisual(); cancelVisual = null; }
+        currentVisual = null;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      } else {
+        renderVisualForBeat(beat);
+      }
     } else if (stage === 2) {
       renderScriptureSlot(scriptureTop, beat.scriptureA);
       renderScriptureSlot(scriptureBot, null);
@@ -203,6 +240,7 @@
   function renderVisualForBeat(beat) {
     if (cancelVisual) { cancelVisual(); cancelVisual = null; }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    currentVisual = beat.visual;
 
     if (beat.visual && window.VISUALS && window.VISUALS[beat.visual]) {
       var result = window.VISUALS[beat.visual](ctx, canvas.width, canvas.height);
@@ -215,8 +253,9 @@
   ───────────────────────────────────────────── */
   function updateNav() {
     var beat = BEATS[beatIdx];
-    if (counter) counter.textContent = beat.id + ' \xb7 ' + BEATS.length;
-    if (navPrev) navPrev.disabled = (phase === 'active' && beatIdx === 0 && stage === 1);
+    var stageLetter = ['a', 'b', 'c'][stage - 1];
+    if (counter) counter.textContent = beat.id + stageLetter + ' \xb7 ' + BEATS.length;
+    if (navPrev) navPrev.disabled = (phase === 'active' && beatIdx === 0 && stage === firstStage(BEATS[0]));
     if (navNext) navNext.disabled = false;
   }
 
