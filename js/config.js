@@ -4,7 +4,7 @@ var CONFIG = {
 
   /* ── Durations (ms) ────────────────────────────────────────────────────────
      Roughly in beat order; multi-beat constants at the top                  */
-  AUTO_REPLAY_MS:        33000,  /* ms of inactivity before current beat auto-replays */
+  AUTO_REPLAY_MS:        10000,  /* ms of inactivity before current beat auto-replays */
   SPIRIT_PULSE_MS:       12000,   /* period of the Spirit band radial love-pulse (ms) */
 
   ORB_CROSSFADE:         5500,   /* orb state transitions (beats 3–5)        */

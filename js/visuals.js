@@ -577,10 +577,12 @@
   /* ── Beat 4: State 3 — orb transitions to human silhouette ── */
   /* Alignment: figH = 4×bigR → body radius = bigR; figCy = h/2 − figH×0.14 → body centred at h/2 */
   window.VISUALS.orbState3 = function (ctx, w, h) {
-    var cx    = w / 2;
-    var bigR  = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
-    var figH  = bigR * 4;
-    var figCy = h * CONFIG.ORB_CENTRE_Y - figH * 0.14;
+    var cx     = w / 2;
+    var orbCy  = h * CONFIG.ORB_CENTRE_Y;
+    var bigR   = Math.min(w, h) * CONFIG.LARGE_ORB_SCALE;
+    var innerR = bigR * (1 - CONFIG.BAND_RATIO);
+    var figH   = bigR * 4;
+    var figCy  = orbCy - figH * 0.14;
     var DURATION = CONFIG.FIGURE_FADE_IN;
     var running = true, t0 = null;
 
@@ -590,29 +592,45 @@
       var p = easeOut(Math.min((ts - t0) / DURATION, 1));
 
       ctx.clearRect(0, 0, w, h);
-      drawFaintRays(ctx, cx, h * CONFIG.ORB_CENTRE_Y, w, h, 0.12);
+      drawFaintRays(ctx, cx, orbCy, w, h, 0.12);
 
-      /* Orb fading out — centred at ORB_CENTRE_Y = body circle centre */
+      /* Spirit band (SPIRIT_RED fill) — always full opacity so the ring stays pink */
       ctx.save();
-      ctx.globalAlpha = 1 - p;
-      drawOrb(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR);
+      ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(cx, orbCy, innerR, 0, Math.PI * 2);
+      ctx.fillStyle = SPIRIT_RED; ctx.fill();
       ctx.restore();
 
-      /* Spirit pulse — independent of orb fade, continues after transition */
-      drawSpiritPulse(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR, ts - t0);
+      /* Gold outer ring — fades out as figure fades in */
+      ctx.save();
+      ctx.globalAlpha = 1 - p;
+      ctx.shadowBlur  = bigR * 0.65; ctx.shadowColor = GOLD;
+      var gGrad = ctx.createRadialGradient(cx, orbCy, innerR, cx, orbCy, bigR);
+      gGrad.addColorStop(0, GOLD); gGrad.addColorStop(1, GOLD_DK);
+      ctx.beginPath(); ctx.arc(cx, orbCy, bigR, 0, Math.PI * 2);
+      ctx.fillStyle = gGrad; ctx.fill();
+      ctx.restore();
+
+      /* Spirit pulse — always running, same as orbState2 */
+      drawSpiritPulse(ctx, cx, orbCy, bigR, ts - t0);
+
+      /* Son teal centre — fades out as figure fades in */
+      ctx.save();
+      ctx.globalAlpha = 1 - p;
+      drawOrbSon(ctx, cx, orbCy, bigR);
+      ctx.restore();
 
       /* Figure fading in */
       ctx.save();
       ctx.globalAlpha = p;
-      ctx.shadowBlur  = figH * 0.04;
-      ctx.shadowColor = TEAL;
+      ctx.shadowBlur  = figH * 0.04; ctx.shadowColor = TEAL;
       drawChrist(ctx, cx, figCy, figH);
       ctx.restore();
 
       /* Trinity labels on body circle — inverted colours (teal outer = FATHER) */
       ctx.save();
       ctx.globalAlpha = p;
-      drawOrbLabels(ctx, cx, h * CONFIG.ORB_CENTRE_Y, bigR, ['SON', 'SPIRIT', 'FATHER']);
+      drawOrbLabels(ctx, cx, orbCy, bigR, ['SON', 'SPIRIT', 'FATHER']);
       ctx.restore();
 
       requestAnimationFrame(frame);  /* always continue — pulse runs indefinitely */

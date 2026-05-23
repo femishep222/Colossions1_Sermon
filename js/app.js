@@ -7,21 +7,21 @@
      CONFIG
   ───────────────────────────────────────────── */
   var WHEEL_GAP_MS = 500;
-  var INIT_DELAY   = 400;
 
   /* ─────────────────────────────────────────────
      STATE
-     phase:   'intro' | 'active' | 'outro'
+     phase:   'active' | 'outro'
      beatIdx: 0-based index into BEATS
      stage:   1 | 2 | 3  (only meaningful when active)
   ───────────────────────────────────────────── */
-  var phase      = 'intro';
+  var phase      = 'active';
   var beatIdx    = 0;
   var stage      = 1;
   var lastWheel  = 0;
   var touchY0    = 0;
   var cancelVisual  = null;
   var currentVisual = null;  /* visual key currently rendered on canvas */
+  var prevBeatIdx   = -1;    /* beatIdx as of the last goStage call */
   var replayTimer   = null;
 
   /* ─────────────────────────────────────────────
@@ -43,8 +43,13 @@
   function sizeCanvas() {
     canvas.width  = storyRight.offsetWidth;
     canvas.height = storyRight.offsetHeight;
-    if (phase === 'active') renderVisualForBeat(BEATS[beatIdx]);
-    if (phase !== 'active') paintBlack();
+    if (phase === 'outro') {
+      paintBlack();
+    } else if (currentVisual) {
+      /* re-render the running visual (canvas was cleared by resize) */
+      renderVisualForBeat(BEATS[beatIdx]);
+    }
+    /* stage a with no visual: canvas is transparently cleared by the resize itself */
   }
 
   /* ─────────────────────────────────────────────
@@ -91,14 +96,6 @@
 
   function advance(dir) {
     if (dir > 0) {
-      if (phase === 'intro') {
-        exitBlackout();
-        phase = 'active';
-        beatIdx = 0;
-        stage = firstStage(BEATS[0]);
-        goStage();
-        return;
-      }
       if (phase === 'outro') return;
 
       var beat = BEATS[beatIdx];
@@ -135,7 +132,6 @@
         goStage();
         return;
       }
-      if (phase === 'intro') return;
 
       var beat = BEATS[beatIdx];
       if (stage === 3) {
@@ -149,19 +145,15 @@
           beatIdx--;
           stage = lastStage(BEATS[beatIdx]);
           goStage();
-        } else {
-          phase = 'intro';
-          enterBlackout();
         }
+        /* else: at beat 0 with no scriptureA — nowhere to go back, navPrev is disabled */
       } else {
         if (beatIdx > 0) {
           beatIdx--;
           stage = lastStage(BEATS[beatIdx]);
           goStage();
-        } else {
-          phase = 'intro';
-          enterBlackout();
         }
+        /* else: at beat 0 stage 1 — nowhere to go back, navPrev is disabled */
       }
     }
   }
@@ -170,18 +162,18 @@
      GO TO CURRENT STAGE
   ───────────────────────────────────────────── */
   function goStage() {
+    var beatChanged = (beatIdx !== prevBeatIdx);
+    prevBeatIdx = beatIdx;
     var beat = BEATS[beatIdx];
 
     if (stage === 1) {
       renderScriptureSlot(scriptureTop, beat.scriptureA);
       renderScriptureSlot(scriptureBot, null);
-      /* clear canvas if entering a different visual; restart if same visual */
-      if (beat.visual !== currentVisual) {
+      /* cross-beat same visual → leave running; otherwise clear (stage a is pre-visual) */
+      if (!(beatChanged && beat.visual === currentVisual)) {
         if (cancelVisual) { cancelVisual(); cancelVisual = null; }
         currentVisual = null;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-      } else {
-        renderVisualForBeat(beat);
       }
     } else if (stage === 2) {
       renderScriptureSlot(scriptureTop, beat.scriptureA);
@@ -191,7 +183,8 @@
     } else {
       renderScriptureSlot(scriptureTop, beat.scriptureA);
       renderScriptureSlot(scriptureBot, beat.scriptureB);
-      /* canvas unchanged */
+      /* ensure visual is running — may be arriving here backward from a different beat */
+      if (beat.visual !== currentVisual) renderVisualForBeat(beat);
     }
 
     updateNav();
@@ -227,7 +220,7 @@
 
       var text = document.createElement('p');
       text.className   = 'scripture-text';
-      text.textContent = item.provocation ? item.text : '“' + item.text + '”';
+      text.textContent = item.text;
       wrapper.appendChild(text);
 
       el.appendChild(wrapper);
@@ -255,7 +248,7 @@
     var beat = BEATS[beatIdx];
     var stageLetter = ['a', 'b', 'c'][stage - 1];
     if (counter) counter.textContent = beat.id + stageLetter + ' \xb7 ' + BEATS.length;
-    if (navPrev) navPrev.disabled = (phase === 'active' && beatIdx === 0 && stage === firstStage(BEATS[0]));
+    if (navPrev) navPrev.disabled = (beatIdx === 0 && stage === firstStage(BEATS[0]));
     if (navNext) navNext.disabled = false;
   }
 
@@ -307,11 +300,11 @@
      INIT
   ───────────────────────────────────────────── */
   function init() {
+    document.body.classList.remove('is-blackout');  /* clear any stale blackout from bfcache */
     attachListeners();
+    stage = firstStage(BEATS[0]);
     sizeCanvas();
-    setTimeout(function () {
-      enterBlackout();  /* start in black intro phase */
-    }, INIT_DELAY);
+    goStage();
   }
 
   document.addEventListener('DOMContentLoaded', init);
