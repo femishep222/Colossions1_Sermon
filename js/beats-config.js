@@ -15,7 +15,7 @@ var BEATS = [
     visual: 'romaneikon',
     persistVisual: false,
     scriptureA: { ref: 'Col 1:15', text: 'He is the image of the invisible God.' },
-    scriptureB: { text: 'Image (Eikōn) = reality?', provocation: true },
+    scriptureB: { text: 'Image (Eikōn) = reality.', provocation: true },
   },
 
   {
@@ -78,7 +78,7 @@ var BEATS = [
     id: 10,
     visual: 'orbState4bPhase2',
     persistVisual: true,
-    scriptureA: { ref: 'Col 1:22', text: 'He has now reconciled in his body of flesh by his death, in order to present you holy and blameless and above reproach before him.' },
+    scriptureA: { text: 'The cost?', provocation: true },
     scriptureB: [
       { ref: 'Matt 27:46', text: 'My God, my God, why have you forsaken me?', crimson: true },
       { ref: 'Matt 27:50', text: 'And Jesus cried out again with a loud voice and yielded up his spirit.' }
@@ -97,7 +97,7 @@ var BEATS = [
     id: 12,
     visual: 'orbState5',
     persistVisual: true,
-    scriptureA: { ref: 'John 16:7', text: 'I tell you the truth: it is to your advantage that I go away, for if I do not go away, the Helper will not come to you. But if I go, I will send him to you.' },
+    scriptureA: { ref: 'John 16:7', text: 'I tell you the truth: it is to your advantage that I go away, for if I do not go away, the Helper will not come to you. But if I go, I will send him to you.', textHtml: '<span class="scripture-emph">I tell you the truth:</span> it is to your advantage that I go away, for if I do not go away, the Helper will not come to you. But if I go, I will send him to you.' },
     scriptureB: { ref: 'John 17:22', text: 'The glory that you have given me I have given to them, that they may be one even as we are one, I in them and you in me.' }
   },
 

@@ -238,8 +238,9 @@
       }
 
       var text = document.createElement('p');
-      text.className   = 'scripture-text';
-      text.textContent = item.text;
+      text.className = 'scripture-text';
+      if (item.textHtml) { text.innerHTML  = item.textHtml; }
+      else               { text.textContent = item.text; }
       wrapper.appendChild(text);
 
       el.appendChild(wrapper);

@@ -123,6 +123,12 @@ body {
   color: #8b0000;
 }
 
+/* Inline emphasis — underline a phrase within scripture text */
+.scripture-emph {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 /* ─────────────────────────────────────────────
    RIGHT PANEL — canvas
 ───────────────────────────────────────────── */
